@@ -1,0 +1,7 @@
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+
+# Ignore generated pdf
+revs/*.pdf
