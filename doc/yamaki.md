@@ -70,25 +70,41 @@ Trackingで作成されたキーフレームごとに動作する。
 - `mIdxIteration`
 - `infoInertial`
 
-#### run()
-
 #### setLoopCloser
 
 メンバ変数`mpLoopCloser`にLoopCloserのポインタをセットしているだけ
 
-#### setTracked
+#### setTracker
 
 メンバ変数`mpTracker`にTrackerのポインタをセットしているだけ
 
-#### 以下GPTによるヘッダファイルの解析内容(随時自分でも解読予定)
+#### Run()
+
+TODO
+
+#### 以下GPTによるヘッダファイルの解析内容を含む(随時自分でも解読予定)
 
 #### InsertKeyFrame
 
 新しいキーフレームをローカルマッピングのキューに追加
+キューの最後尾にキーフレームを追加している。
+フラグとして`mbAbortBA`をtrueにしている?
+
+#### CheckNewKeyFrames
+
+新しいキーフレームがあればtrue、なければfalseを返す。
 
 #### ProcessNewKeyFrame
 
-挿入されたキーフレームを処理し、新しいマップポイントの作成や周囲のキーフレームとの関係を湖心する
+挿入されたキーフレームを処理し、新しいマップポイントの作成や周囲のキーフレームとの関係を更新する
+
+- キーフレームの取得
+- Bowの計算
+- キーフレームにMapPointを関連付ける
+- Covicibility Graphの更新
+- キーフレームをマップに挿入
+
+などの動作を行っている
 
 #### CreateNewMapPoints
 
