@@ -1,12 +1,14 @@
 # ORBSLAM概要メモ
 
-## Tracking
+## ORBSLAMのシステム概要
+
+### Tracking
 
 フレームごとに動作する。
 
 今年は触らない
 
-### 現在把握できているTrackingの役割
+#### 現在把握できているTrackingの役割
 
 - ORB特徴点の抽出
 - 特徴点のマッチング
@@ -14,22 +16,22 @@
 - IMUデータの統合
 - キーフレームの作成（キーフレーム条件を満たすとき）
 
-## LocalMapping
+### LocalMapping
 
 Trackingで作成されたキーフレームごとに動作する。
 
-### 現在把握できているLocalMappingの役割
+#### 現在把握できているLocalMappingの役割
 
 - 局所地図に対し、特徴点の追加
 - 局所地図の最適化（バンドル調整）
 - 未マッチングの特徴点に対して対応付け
 - 重複するキーフレームを削除
 
-## LoopClosing
+### LoopClosing
 
 キーフレームごとに動作する。
 
-### 現在把握できているLoopClosingの役割
+#### 現在把握できているLoopClosingの役割
 
 - ループの探索および統合
 - EssentialGraphの最適化
@@ -47,15 +49,15 @@ Trackingで作成されたキーフレームごとに動作する。
 
 ### LocalMapping
 
-#### 変数
+#### コンストラクタで初期化される変数
 
-- `mpSystem`
+- `mpSystem` ORBSLAM3システムへのポインタ
 - `mbMonocular` 単眼カメラかどうかのbool値、MONOCULARカメラの時true
 - `mbInertial` 慣性データがあるかどうかのbool値,使われているセンサーがIMU_MONOCULARもしくはIMU_STREOのときtrue
 - `mbResetRequested`
 - `mbResetRequestedActiveMap`
 - `mbFinisjhRequested`
-- `mpAtlas`
+- `mpAtlas` 現在のマップ情報へのポインタ
 - `bInitializing`
 - `mbAbortBA`
 - `mbStopped`
@@ -67,6 +69,62 @@ Trackingで作成されたキーフレームごとに動作する。
 - `mbNotBA2`
 - `mIdxIteration`
 - `infoInertial`
+
+#### run()
+
+#### setLoopCloser
+
+メンバ変数`mpLoopCloser`にLoopCloserのポインタをセットしているだけ
+
+#### setTracked
+
+メンバ変数`mpTracker`にTrackerのポインタをセットしているだけ
+
+#### 以下GPTによるヘッダファイルの解析内容(随時自分でも解読予定)
+
+#### InsertKeyFrame
+
+新しいキーフレームをローカルマッピングのキューに追加
+
+#### ProcessNewKeyFrame
+
+挿入されたキーフレームを処理し、新しいマップポイントの作成や周囲のキーフレームとの関係を湖心する
+
+#### CreateNewMapPoints
+
+キーフレームと対応するフレームの特徴点から新しいマップポイントを生成する。
+
+#### MapPointCulling
+
+不適切なマップポイントを削除する。観測数が少ないマップポイントや品質の低いものが削除対象。
+
+#### SearchInNeighbors
+
+新しいキーフレームの周辺にあるキーフレームと一致するマップポイントを探索し、寒冷性を高める
+
+#### KeyFrameCulling
+
+一定条件に基づいて、不要なキーフレームを削除する。キーフレーム数を適切に管理しメモリ使用量を抑える
+
+#### RequestStop / Stop / Rerease
+
+ローカルマッピングのスレッドを制御する。ローカルマッピングの停止や再開がリクエストされた場合の動作を定義している。
+
+#### RequestReset
+
+リセットをリクエストし、ローカルマッピングの状態を初期化する。
+
+#### RequestFinish / isFinished
+
+ローカルマッピングの終了をリクエストし、終了したかどうかを確認するためのメソッド。
+
+#### InitializeIMU
+
+IMUを用いてシステムの初期化を行う。IMUデータを用いてローカルマッピングの精度を向上させる。
+
+#### ScaleRefinement
+
+マップのスケールを微調整するためのメソッド。IMUを用いてスケールの調整を行う。
 
 ## TODO
 
