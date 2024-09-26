@@ -1,4 +1,4 @@
-# ORBSLAM概要
+# ORBSLAM概要メモ
 
 ## Tracking
 
@@ -46,6 +46,27 @@ Trackingで作成されたキーフレームごとに動作する。
 - `p` ポインタ
 
 ### LocalMapping
+
+#### 変数
+
+- `mpSystem`
+- `mbMonocular` 単眼カメラかどうかのbool値、MONOCULARカメラの時true
+- `mbInertial` 慣性データがあるかどうかのbool値,使われているセンサーがIMU_MONOCULARもしくはIMU_STREOのときtrue
+- `mbResetRequested`
+- `mbResetRequestedActiveMap`
+- `mbFinisjhRequested`
+- `mpAtlas`
+- `bInitializing`
+- `mbAbortBA`
+- `mbStopped`
+- `mbStopRequested`
+- `mbNotStop`
+- `mbAcceptKeyFrames`
+- `mIdxInit`
+- `mbNotBA1`
+- `mbNotBA2`
+- `mIdxIteration`
+- `infoInertial`
 
 ## TODO
 
