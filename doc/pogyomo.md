@@ -24,3 +24,17 @@ Frameの中で地図の構築に用いられるもの。基本的にはFrameと�
   - `b` IMU座標系
   - `c` カメラ座標系
   - `w` グローバル座標系
+
+# InitializeIMUにおけるInertialBA1とInertialBA2の意味
+
+以下の記述がある。[1]
+
+> Our previous work [3] shows that this results in large unpredictable errors,
+> that can be corrected by adding two rounds of VisualInertial Bundle Adjustment (VI-BA), 
+> together with two tests to detect and discard bad initializations.
+
+どうやらある程度大きいエラーを修正するにはBAを2回行うといいらしい。
+
+# 参考文献
+
+- [1](https://arxiv.org/pdf/2003.05766)
