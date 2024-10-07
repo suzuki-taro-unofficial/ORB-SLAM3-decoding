@@ -64,6 +64,10 @@ ORB-SLAM3の初期化は以下の3つのステップに分けられる。
 - Visual-inertial MAP estimation
   - 上で得られた情報を組み合わせてfull VI-BAを行う。
 
+# TODO
+
+up-to-scaleをスケールを除いてと訳したが本当の意味は？
+
 # 参考文献
 
 - [1](https://arxiv.org/pdf/2003.05766)
