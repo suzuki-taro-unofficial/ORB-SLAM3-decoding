@@ -64,6 +64,11 @@ ORB-SLAM3の初期化は以下の3つのステップに分けられる。
 - Visual-inertial MAP estimation
   - 上で得られた情報を組み合わせてfull VI-BAを行う。
 
+# Rwgの意味
+
+重力を $g$ として、 $g = R_{wg}g_1$ となるもの。ただし $g_1 = (0, 0, G)$ で $G$は重力加速度。
+[1]の式(1)から。
+
 # TODO
 
 up-to-scaleをスケールを除いてと訳したが本当の意味は？
