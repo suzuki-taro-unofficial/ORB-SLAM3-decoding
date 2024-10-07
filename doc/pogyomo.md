@@ -44,6 +44,26 @@ Frameの中で地図の構築に用いられるもの。基本的にはFrameと�
 - 初期速度
 - 加速度計とジャイロスコープのバイアス
 
+そのための手法は主にjointなものとdisjointなものに分けられる。
+
+- joint
+  - IMUの情報とカメラの情報を推定する方程式を立てている。
+- disjoint
+  - 単眼カメラから得られた軌跡はスケールを除いて正確であると仮定し、その情報を下にIMUの情報を最適化する。
+
+ORB-SLAM3ではdisjointな方法を用いている。さらに、既存の手法と異なりその推定を一回で行っている。
+
+ORB-SLAM3の初期化は以下の3つのステップに分けられる。
+
+- Visual-only MAP estimation
+  - 単眼カメラのSLAMを動かして(約2秒ほど)軌跡をBAを用いて推定する。これはスケールを除いて正確であると考えられる。
+  - キーフレーム間とそれらの共分散間のIMU preintegrationを計算する。[8]
+- Inertial-only MAP estimation
+  - IMUとORB-SLAMの軌跡を推定する。
+  - この段階でスケールとキーフレームの速度、重力の向き、そしてIMUのバイアスを見つける。
+- Visual-inertial MAP estimation
+  - 上で得られた情報を組み合わせてfull VI-BAを行う。
+
 # 参考文献
 
 - [1](https://arxiv.org/pdf/2003.05766)
