@@ -25,12 +25,18 @@ Frameの中で地図の構築に用いられるもの。基本的にはFrameと�
   - `c` カメラ座標系
   - `w` グローバル座標系
 
+# Atlas
+
+- AtlasをFRP化する必要性がありそう
+- FRP化した場合にバイナリとしてクラスを吐き出すのが困難そう
+  - バイナリに吐き出すのは一時停止したときに復帰するのに必要そう
+
 # InitializeIMUにおけるInertialBA1とInertialBA2の意味
 
 以下の記述がある。[1]
 
 > Our previous work [3] shows that this results in large unpredictable errors,
-> that can be corrected by adding two rounds of VisualInertial Bundle Adjustment (VI-BA), 
+> that can be corrected by adding two rounds of VisualInertial Bundle Adjustment (VI-BA),
 > together with two tests to detect and discard bad initializations.
 
 どうやらある程度大きいエラーを修正するにはBAを2回行うといいらしい。
