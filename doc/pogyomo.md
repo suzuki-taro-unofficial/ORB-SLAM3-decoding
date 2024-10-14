@@ -36,6 +36,8 @@ Frameの中で地図の構築に用いられるもの。基本的にはFrameと�
 1. FRPAtlasをバイナリ可能な形式に変換/復元する方法を新しく作る
 2. そもそも書き出さない（復帰を諦める）
 
+追記 by eraser: これはFRP化されたAtlasやその他の中身には関係がないため、頭の片隅においておけばOK。Systemの実装時に考える必要あり。
+
 # InitializeIMUにおけるInertialBA1とInertialBA2の意味
 
 以下の記述がある。[1]
