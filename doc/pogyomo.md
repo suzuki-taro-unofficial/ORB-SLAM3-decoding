@@ -25,12 +25,37 @@ Frameの中で地図の構築に用いられるもの。基本的にはFrameと�
   - `c` カメラ座標系
   - `w` グローバル座標系
 
+# Atlas
+
+- AtlasをFRP化する必要性がありそう
+- FRP化した場合にバイナリとしてクラスを吐き出すのが困難そう
+  - バイナリに吐き出すのは一時停止したときに復帰するのに必要そう
+
+## 対処法
+
+1. FRPAtlasをバイナリ可能な形式に変換/復元する方法を新しく作る
+2. そもそも書き出さない（復帰を諦める）
+
+追記 by eraser: これはFRP化されたAtlasやその他の中身には関係がないため、頭の片隅においておけばOK。Systemの実装時に考える必要あり。
+
+# Trackingの副作用
+
+- 1389行目の`SetLastMapChange`
+- `TrackReferenceKeyFrame`内
+  - 2186~2204行目のループ内での`MapPoint`に対する変更
+- `TrackWithMotionModel`内
+  - 2337~2354行目のループ内での`MapPoint`に対する変更
+- `TrackLocalMap`内
+  - Optimizerの関数に渡しているFrameが保持するMapPoints
+- 1506行目の`CreateMapInAtlas`
+- `mpSystem->ResetActiveMap`によってAtlasに変更がかかる？
+
 # InitializeIMUにおけるInertialBA1とInertialBA2の意味
 
 以下の記述がある。[1]
 
 > Our previous work [3] shows that this results in large unpredictable errors,
-> that can be corrected by adding two rounds of VisualInertial Bundle Adjustment (VI-BA), 
+> that can be corrected by adding two rounds of VisualInertial Bundle Adjustment (VI-BA),
 > together with two tests to detect and discard bad initializations.
 
 どうやらある程度大きいエラーを修正するにはBAを2回行うといいらしい。
