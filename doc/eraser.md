@@ -159,3 +159,145 @@ FRP化は
 完全に並列処理するのはやめたほうがいいか？少なくとも大筋理解してからやらないとバカやりそう。まぁ、やろうとしてもそもそもできんか。
 
 とりま3.aが怖いのは、リファクタリングのつもりがぶっ壊しましたーってやつ。それをやるのは明確に実装期にはいるまで取っておきたい気持ち。
+
+# LocalMappingの副作用
+
+- LocalMapping::InsertKeyFrame
+  - mMutexNewKFs: 入力キューへの副作用
+- LocalMapping::CheckNewKeyFrames
+  - mMutexNewKFs: 入力キューの読み取り（副作用はない）
+- LocalMapping::ProcessNewKeyFrame
+  - mMutexNewKFs: 入力キューへの副作用（先頭要素のポップ）
+- LocalMapping::RequestStop
+  - mMutexStop: 停止フラグへの書き込み
+  - mMutexNewKFs: BAキャンセルフラグへの書き込み?
+- LocalMapping::Stop
+  - mMutexStop: 停止フラグの読み取りと書き込み
+- LocalMapping::isStopped
+  - mMutexStop: 停止済みフラグの読み込み
+- LocalMapping::isStopped
+  - mMutexStop: 停止リクエストフラグの読み込み
+- LocalMapping::Release
+  - mMutexFinish: 終了済みフラグの読み込み
+  - mMutexStop: 停止リクエストフラグ、停止済みフラグの書き込み
+  - メモ mMutexNewKFsのロックを取らずに入力キューをクリアしている
+- LocalMapping::AcceptKeyFrames
+  - mMutexAccept: フラグの読み取り
+- LocalMapping::SetAcceptKeyFrames
+  - mMutexAccept: フラグの書き込み
+- LocalMapping::SetNotStop
+  - mMutexStop: mbStoppedの読み取りとmbNotStopの書き込み
+- LocalMapping::InterruptBA
+  - メモ mMutexNewKFsのロックを取らずに書き込み。
+  - 変数名的に合っているかはわからないが、LocalMapping::RequestStopではロックを取っているはず
+-
+
+# 2024/10/16ゼミで話したいこと
+
+## 中間ポスターについて
+
+レビューはもらったので修正&提出する。
+その他で話すことがあれば話す。
+
+## FRP化について
+
+### 範囲
+
+まず、Tracking、LocalMapping、LoopClosing、System、Atlasの全てをFRPで包む必要があるのは必定。
+
+問題は側だけじゃなくて中身も改変が必要そうになってること。
+
+### データ構造の話
+
+Map、KeyFrame、MapPointの関係性概略
+
+```ts
+class Map {
+    keyFrames: Vec<KeyFrame *>
+    mapPoints: Vec<MapPoint *>
+}
+
+class KeyFrame {
+    map: Map *
+    mapPoints: Vec<MapPoint *>
+}
+
+class MapPoint {
+    map: Map *
+    keyFrames: Vec<KeyFrame *>
+}
+```
+
+このようにポインタによる三つ巴の相互参照をしている。
+
+#### 問題点
+
+ここからの話は全部C++のコピーの仕様を勝手に想像してのものなのでそれが間違ってるなら見当違いかも
+
+このようなデータ構造をCellで単につつ婿とは可能？（コピーしたりできる？）
+
+おそらくコピーは可能。ただ、コピーしたからと言って副作用を起こしてもいい状態にはならない。
+
+例えばMapをコピーしたとして、新しいMapは基のMapとは異なるメモリ空間に生成される。
+ｃ++のコピーの仕様を知らないので間違っていたら教えてほしいが、
+新しいMapの中に入っているkeyFrames[0]はおそらく元のMapのkeyFrames[0]と同じポインタ値になる。
+
+でnewMap.keyFrames[0]->mapは旧Mapを指すことになる。
+
+この状態でBA(newMap.keyFrames[0]->map)みたいなことが起これば、
+たとえコピーを取ったとしてもコピー元に対して副作用が起こってしまう。
+
+つまり現状のデータ構造だと、以下のようにただ単にTrackingとかの側をFRPで包んで解決とはならない。
+
+```c++
+Cell<Map> c_map = new Cell(new Map());
+
+c_map.map([](Map map /* ここでコピー */) {
+    BA(&map) // 副作用
+    return map // コピーしたものを次の値に
+})
+
+void BA(Map *map) {
+    // 適当な副作用
+    map.mapPoints[0]->x = 0;
+}
+```
+
+このようなコードだったとしても、コピー元の値に副作用が入るので、
+`c_map`を別の場所で使っていた場合実行順で結果が変わったり、そうでなくとも参照先の齟齬があるのでバグることになる。
+
+#### 解決策
+
+以下のようなデータ構造に変更。というかAtlasをこんな感じに改造する。
+
+```ts
+type ID = int; // なんでもいいけどとりまわかりやすさのため
+
+class Map {
+  keyFrameIDs: Vec<ID>;
+  mapPointIDs: Vec<ID>;
+}
+
+class KeyFrame {
+  mapID: ID;
+  // MapPoint群のIDは所持しない
+}
+
+class MapPoint {
+  mapID: ID;
+  // KeyFrame群のIDは所持しない
+}
+
+class Atlas {
+    maps: Cell<std::Map<ID, Map>>;
+    keyFrames: Cell<std::Map<ID, KeyFrame>>;
+    mapPoints: Cell<std::Map<ID, MapPoint>>;
+
+    keyFrames2mapPoints: Cell<pair<
+        Map<ID, Set<KeyFrame>>,
+        Map<ID, Set<MapPoint>>
+    >>
+}
+```
+
+###
