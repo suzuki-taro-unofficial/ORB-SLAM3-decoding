@@ -8,12 +8,6 @@
 - `sLDCtrPulses` LoopDController内のqueueControllarからpopを行うためのストリーム。queueからpopされた情報はLoopDetectorでholdされる。
 - `sLoopDPulses` LoopDetecterで保持しているセルからスナップショットをとるために使われているストリーム。
 
-### memo
-
-LoopDetectorをキューからのpopで動かしてはいけない理由を再確認したい。
-
-sLoopDPulsesは複数のループ検知をスレッドで非同期に動かすためにあるものだと思っていた。キュー
-
 ## ORBSLAMのシステム概要
 
 ### Tracking
