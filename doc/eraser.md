@@ -49,255 +49,30 @@ ORB独自のものとして
 - SO(3): 3次元空間における回転を表すリー群です。つまり、3次元空間の原点を中心に回転させる行列の集合です。これらの行列は、直交行列であり、行列式が1であるという特性があります。
 - SE(3): 3次元空間における剛体変換を表すリー群です。これは回転と平行移動の両方を含む変換の集合であり、一般的には4x4の同次変換行列として表されます。
 
-## 雑記
+## 2024/10/25追記
 
-# やらなきゃいけないこと
+- CreateNewMapPointsについて
+  - 冒頭あたりで、GetBestCovisibilityKeyFramesを使ってCovisibilityGraph上でつながったKFを探している。
+  - その後、currentKFのprevKFを探索していって、GetBestCovisibilityKeyFramesの結果に含まれていたら、GetBestCovisibilityKeyFramesの結果にKF（prevKF）を加えている。
+  - つまり、同一のKFをvector上に入れている。
+  - ちょっとよくわからない。
 
-解読
-FRP化の設計と適用範囲、方法の考察
-実装
+## Dockerの環境での問題点
 
-この内、１が２に依存、３と２が相互依存している？
-ここまで１のみについてやってきたが、２について考えながら１をやってくれと言われたので。
-（FRP化しない部分は読まないなどそういう意味で）
+Docker環境を用意し、ビルドまではうまくようになった。
+ただ、実行すると以下のようなエラーが出る。
 
-# 段階的な実装の方法について考える
-
-- メンバ変数を暗黙的な引数にしているのを明示的な引数へ変える
-  - mapで包むだけでFRP可が可能な状態にする
-- 関数を切りける
-  - mapなどで扱いやすいサイズにする
-  - 中身の変更までしない部分は触らない？
-    - ほぼすべてのメンバ関数が副作用を持っているため、副作用を引数に移動する作業はほぼすべての関数に必要
-    - その際に変更しやすいサイズにしておく？
-  - 結局読み取り及び書き込みを行うメンバ変数の把握は必要だし、引数化する場合ネスト先の関数の引数までネスト元で受け取る必要がある
-  - そもそもメンバ変数として保つ必要があるかどうかについて考えるべき？
-    - グローバル変数と言い換えてもいい
-    - 自身のメンバ関数を呼び出す際には引数を渡さない縛りが入っていて、そのためにメンバ変数にされているものが多そう
-    - 実際外部からの入力以外では引数にとっていなさそう
-    - 呼び出し元で計算したものを伝える手段としてメンバ変数を使っており、これらは状態ではない
-    - 状態と計算結果のメモを分ける作業が必要
-      - FRPの性質上必須（Cellとして扱うかの判断）
-      - 状態とメモの分け方について考えておく必要あり
-  - あとは前処理と中身が切り分けられているのが、知識の漏れ出しではないのかについても考えるべき
-    - 少なくとも前処理を関数化したほうがいい部分は大いにある
-
-頭ゴチャゴチャしたから一旦リセット。
-
-もうちょっと大域的に分けて
-
-- 現コードのリファクタリング
-- FRP化
-
-っていうのでいいかも。
-
-現コードのリファクタリングは
-
-- 状態以外のメンバ変数をローカル変数などに変更
-- （必要なら）処理の切り分け
-- （必要なら）モジュール（クラス）やファイルの切り分け
-
-その他諸々。必須なのは１番上だけ。
-
-他にも変数名とかをまともにしたいなという気持ちがないでもないが、元コードと対応付けが取れる状態の方が良い？
-大改築が入って誤差みたいなことになりそうw
-
-FRP化は
-
-- SystemのFRP化（ルートロジック）
-- Tracking、LocalMapping、LoopClosingのFRP化（モジュール）
-- AtlasのFRP化（ストア）
-
-が必要そうになっていて、全てのモジュールがストアの読み取り・書き込みをできるように工夫する必要があり、この実現が一番難しそう。
-各モジュール内のFRP化は、上記の仕組みができている前提で設計・実装することは可能？
-仕組みが各モジュールの実装に影響を与えるのであれば、ある程度形になるまでトップダウンに制作したい。
-ルートとストアと、モジュールのインタフェース部分だけは完成しないと動作テストはできないから期にしなくていい？
-
-というか、似たような構成と仕組みを持った簡単なアプリケーションを作ってみるのが良さそうか？
-2つなり３つなり、複数のモジュールがそれぞれ別々のトランザクションで稼働していて、全てが同じストアを読み取り・書き込みできる、簡単なアプリケーション。
-
-追加後に内容編集可能なToDoListを複数人がいじる。これを１画面上に全員分表示して、Aさんの方で編集するとBさんの方でも確認ができる。
-
-っていうのが思いつく中で一番簡単な実装になるかな？
-
-こう考えると何もむずくなさそうに聞こえるんだが、ORB SLAMでむずそうに見えてるのはもっと別の場所？
-あぁ…KF、Map、MPが相互参照している状態で消したり追加したりしなきゃいけないからだ….。
-もっというならKFとMPが多対多なのも拍車をかけそう…
-
-# Reやらなきゃいけないこと
-
-改めてやらなきゃいけないことは
-
-- 解読
-  - コードの解読
-  - 論文のリサーチ（pogyomoが読んでみたいな、もうちょっと踏み込んだ部分それぞれに対しての論文があるみたいなのでそれをちょっと見てみるべきかなと
-- FRP化の設計と適用範囲、方法の考察
-  - テストアプリの制作（さっきのToDoListみたいなの）
-- 実装
-  - 現コードのリファクタリング
-    - 状態以外のメンバ変数をローカル変数などに変更
-    - （必要なら）処理の切り分け
-    - （必要なら）モジュール（クラス）やファイルの切り分け
-  - FRP化
-    - SystemのFRP化（ルートロジック）
-    - Tracking、LocalMapping、LoopClosingのFRP化（モジュール）
-    - AtlasのFRP化（ストア）
-
-今やらなきゃいけないことは １メインと２なんだが、気持ちが２メインと３寄りに揺れている。
-理由は単純明快で、3.aがやりたすぎるのと１が嫌すぎること。
-
-ただ流石に３は気が早いし、教授に進捗報告してもそう言われるのは明らか。
-
-一旦２に振り切ってしまう？
-
-- テストアプリの制作
-  - やるなら１日とかでぱっと終わらせる
-- それを踏まえて、ORB SLAMをどうしてくれようか考えながら解読
-  - Atlas周りとか。肝になるのはストア周りになりそうだから。
-
-１に重点を置くときは3.aも並列処理していくのはあり？
-完全に並列処理するのはやめたほうがいいか？少なくとも大筋理解してからやらないとバカやりそう。まぁ、やろうとしてもそもそもできんか。
-
-とりま3.aが怖いのは、リファクタリングのつもりがぶっ壊しましたーってやつ。それをやるのは明確に実装期にはいるまで取っておきたい気持ち。
-
-# LocalMappingの副作用
-
-- LocalMapping::InsertKeyFrame
-  - mMutexNewKFs: 入力キューへの副作用
-- LocalMapping::CheckNewKeyFrames
-  - mMutexNewKFs: 入力キューの読み取り（副作用はない）
-- LocalMapping::ProcessNewKeyFrame
-  - mMutexNewKFs: 入力キューへの副作用（先頭要素のポップ）
-- LocalMapping::RequestStop
-  - mMutexStop: 停止フラグへの書き込み
-  - mMutexNewKFs: BAキャンセルフラグへの書き込み?
-- LocalMapping::Stop
-  - mMutexStop: 停止フラグの読み取りと書き込み
-- LocalMapping::isStopped
-  - mMutexStop: 停止済みフラグの読み込み
-- LocalMapping::isStopped
-  - mMutexStop: 停止リクエストフラグの読み込み
-- LocalMapping::Release
-  - mMutexFinish: 終了済みフラグの読み込み
-  - mMutexStop: 停止リクエストフラグ、停止済みフラグの書き込み
-  - メモ mMutexNewKFsのロックを取らずに入力キューをクリアしている
-- LocalMapping::AcceptKeyFrames
-  - mMutexAccept: フラグの読み取り
-- LocalMapping::SetAcceptKeyFrames
-  - mMutexAccept: フラグの書き込み
-- LocalMapping::SetNotStop
-  - mMutexStop: mbStoppedの読み取りとmbNotStopの書き込み
-- LocalMapping::InterruptBA
-  - メモ mMutexNewKFsのロックを取らずに書き込み。
-  - 変数名的に合っているかはわからないが、LocalMapping::RequestStopではロックを取っているはず
--
-
-# 2024/10/16ゼミで話したいこと
-
-## 中間ポスターについて
-
-レビューはもらったので修正&提出する。
-その他で話すことがあれば話す。
-
-## FRP化について
-
-### 範囲
-
-まず、Tracking、LocalMapping、LoopClosing、System、Atlasの全てをFRPで包む必要があるのは必定。
-
-問題は側だけじゃなくて中身も改変が必要そうになってること。
-
-### データ構造の話
-
-Map、KeyFrame、MapPointの関係性概略
-
-```ts
-class Map {
-    keyFrames: Vec<KeyFrame *>
-    mapPoints: Vec<MapPoint *>
-}
-
-class KeyFrame {
-    map: Map *
-    mapPoints: Vec<MapPoint *>
-}
-
-class MapPoint {
-    map: Map *
-    keyFrames: Vec<KeyFrame *>
-}
+```txt
+root@2f60aff5afbf:/ORB_SLAM3# make run1
+./Examples/Stereo/stereo_euroc ./Vocabulary/ORBvoc.txt ./Examples/Stereo/EuRoC.yaml ~/dataset/MH04 ./Examples/Stereo/EuRoC_TimeStamps/MH04.txt dataset-MH04_stereo
+./Examples/Stereo/stereo_euroc: error while loading shared libraries: libORB_SLAM3.so: cannot open shared object file: No such file or directory
+make: *** [Makefile:2: run1] Error 127
+root@2f60aff5afbf:/ORB_SLAM3# ldd build/Examples/Stereo
+Stereo/          Stereo-Inertial/
+root@2f60aff5afbf:/ORB_SLAM3# ldd build/Examples/Stereo/stereo_euroc | grep ORB_SLAM3
+        libORB_SLAM3.so => /ORB_SLAM3/build/src/libORB_SLAM3.so (0x00007fa562600000)
+        libDBoW2.so => /ORB_SLAM3/Thirdparty/DBoW2/lib/libDBoW2.so (0x00007fa561b26000)
+        libg2o.so => /ORB_SLAM3/Thirdparty/g2o/lib/libg2o.so (0x00007fa561a8b000)
 ```
 
-このようにポインタによる三つ巴の相互参照をしている。
-
-#### 問題点
-
-ここからの話は全部C++のコピーの仕様を勝手に想像してのものなのでそれが間違ってるなら見当違いかも
-
-このようなデータ構造をCellで単につつ婿とは可能？（コピーしたりできる？）
-
-おそらくコピーは可能。ただ、コピーしたからと言って副作用を起こしてもいい状態にはならない。
-
-例えばMapをコピーしたとして、新しいMapは基のMapとは異なるメモリ空間に生成される。
-ｃ++のコピーの仕様を知らないので間違っていたら教えてほしいが、
-新しいMapの中に入っているkeyFrames[0]はおそらく元のMapのkeyFrames[0]と同じポインタ値になる。
-
-でnewMap.keyFrames[0]->mapは旧Mapを指すことになる。
-
-この状態でBA(newMap.keyFrames[0]->map)みたいなことが起これば、
-たとえコピーを取ったとしてもコピー元に対して副作用が起こってしまう。
-
-つまり現状のデータ構造だと、以下のようにただ単にTrackingとかの側をFRPで包んで解決とはならない。
-
-```c++
-Cell<Map> c_map = new Cell(new Map());
-
-c_map.map([](Map map /* ここでコピー */) {
-    BA(&map) // 副作用
-    return map // コピーしたものを次の値に
-})
-
-void BA(Map *map) {
-    // 適当な副作用
-    map.mapPoints[0]->x = 0;
-}
-```
-
-このようなコードだったとしても、コピー元の値に副作用が入るので、
-`c_map`を別の場所で使っていた場合実行順で結果が変わったり、そうでなくとも参照先の齟齬があるのでバグることになる。
-
-#### 解決策
-
-以下のようなデータ構造に変更。というかAtlasをこんな感じに改造する。
-
-```ts
-type ID = int; // なんでもいいけどとりまわかりやすさのため
-
-class Map {
-  keyFrameIDs: Vec<ID>;
-  mapPointIDs: Vec<ID>;
-}
-
-class KeyFrame {
-  mapID: ID;
-  // MapPoint群のIDは所持しない
-}
-
-class MapPoint {
-  mapID: ID;
-  // KeyFrame群のIDは所持しない
-}
-
-class Atlas {
-    maps: Cell<std::Map<ID, Map>>;
-    keyFrames: Cell<std::Map<ID, KeyFrame>>;
-    mapPoints: Cell<std::Map<ID, MapPoint>>;
-
-    keyFrames2mapPoints: Cell<pair<
-        Map<ID, Set<KeyFrame>>,
-        Map<ID, Set<MapPoint>>
-    >>
-}
-```
-
-###
+shared libraryが見つからないとのことだが、lddでみてみるとちゃんと存在しているように見える。
