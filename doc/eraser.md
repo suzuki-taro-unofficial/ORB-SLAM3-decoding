@@ -76,3 +76,14 @@ root@2f60aff5afbf:/ORB_SLAM3# ldd build/Examples/Stereo/stereo_euroc | grep ORB_
 ```
 
 shared libraryが見つからないとのことだが、lddでみてみるとちゃんと存在しているように見える。
+
+## メモ 2024/10/31
+
+- System::SaveDebugDataでのみ読み込まれるメンバ変数が割とある。
+  - それさえなければ
+    - unusedなもの: mcovInertial, etc.
+    - 書き込みだけ行われるもの: mInitTime, etc.
+    - ローカル変数にできるものなど: mScale, etc.
+  - FRP化するからにはこういう読み取り方法もできなくなるので、SaveDebugData自体消してしまっても良いかも？
+    - 必要になった時に作るとか
+    - SaveDebugDataが何を出しているのかとか見てから考える
