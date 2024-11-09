@@ -98,3 +98,8 @@ shared libraryが見つからないとのことだが、lddでみてみるとち
   - bRelaunchBAは常にfalse
   - したがって実行されない
   - コメントを残してGlobalBAの処理をMergeLocalから削除した
+- よくわからないフローの処理があった
+  - TrackingでSystem::ResetActiveMapを呼び出す
+  - System::ResetActiveMapはSystem.mbResetActiveMapをtrueに設定する
+  - System::TrackStereoなどの各種トラック関数がSystem.mbResetActiveMapを読み取り、trueだった場合にTracking::ResetActiveMapを呼び出す
+  - Tracking::ResetActiveMapはマップのリセット処理を行う
