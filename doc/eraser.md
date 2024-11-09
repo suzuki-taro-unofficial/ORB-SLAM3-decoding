@@ -87,3 +87,14 @@ shared libraryが見つからないとのことだが、lddでみてみるとち
   - FRP化するからにはこういう読み取り方法もできなくなるので、SaveDebugData自体消してしまっても良いかも？
     - 必要になった時に作るとか
     - SaveDebugDataが何を出しているのかとか見てから考える
+
+## メモ 2024/11/9
+
+- LoopClosingがTrackingのGetLastKeyframeを呼び出すのが妥当なのかわからない
+  - GetLastKeyframeが返すのは、Trackingが生成した最新のKF
+  - CurrentKeyframeに付いてループ検出マージ検出をしたのに、それより新しい可能性のあるLastKeyFrameをマージ処理に使っている
+- MergeLocalの際にGBAが絶対に実行されない
+  - MergeLocalの処理内でGlobalBAを実行するための条件式に、bRelaunchBAがある
+  - bRelaunchBAは常にfalse
+  - したがって実行されない
+  - コメントを残してGlobalBAの処理をMergeLocalから削除した
