@@ -103,3 +103,11 @@ shared libraryが見つからないとのことだが、lddでみてみるとち
   - System::ResetActiveMapはSystem.mbResetActiveMapをtrueに設定する
   - System::TrackStereoなどの各種トラック関数がSystem.mbResetActiveMapを読み取り、trueだった場合にTracking::ResetActiveMapを呼び出す
   - Tracking::ResetActiveMapはマップのリセット処理を行う
+
+## メモ 2024/11/11
+
+- Streo + IMUなど特定パターンのみ対応しそれ以外のパターンをすべて消してしまいたい
+  - 我々の研究の目標はORB_SLAM3を完全に移植することではなく、 並列FRPを用いたVisual SLAMのプロトタイプを実装すること
+  - プロトタイプの時点で全てのカメラタイプを網羅することは考えなくて良いはず。
+  - 複数のカメラタイプを想定することにおよってコードの煩雑化、スパゲティ化がひどいので、
+    Stereo + IMUなど特定パターンについてのみ考えることでシステムやネットワークをシンプルにしたい
