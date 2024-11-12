@@ -111,3 +111,14 @@ shared libraryが見つからないとのことだが、lddでみてみるとち
   - プロトタイプの時点で全てのカメラタイプを網羅することは考えなくて良いはず。
   - 複数のカメラタイプを想定することにおよってコードの煩雑化、スパゲティ化がひどいので、
     Stereo + IMUなど特定パターンについてのみ考えることでシステムやネットワークをシンプルにしたい
+
+## メモ 2024/11/12
+
+- LocalMapping.mbBadImuについて
+  - mbBadImuはLocalBAの中でいくつかの条件を突破するとtrueになる
+  - mbBadImuがtrueになっていると、LocalMappingの主要な処理全体が行われないようになる
+  - mbBadImuはResetIfRequestedでリセットリクエストが飛んでいた場合にfalseに戻る
+  - Tracking::Track内で、mbBadImuがtrueの場合にLocalMapping::RequestResetActiveMapを実行している
+  - LocalMappingは3000ms毎、Trackingは画像が入る毎なので速度に差はあるが、
+    LocalMapping側で結局ループしてリセットリクエストを見てという形でLocalMappingのタイミングに同期されているので、
+    LocalMapping内に閉じることができそう
