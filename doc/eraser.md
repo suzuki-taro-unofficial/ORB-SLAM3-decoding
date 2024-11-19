@@ -122,3 +122,23 @@ shared libraryが見つからないとのことだが、lddでみてみるとち
   - LocalMappingは3000ms毎、Trackingは画像が入る毎なので速度に差はあるが、
     LocalMapping側で結局ループしてリセットリクエストを見てという形でLocalMappingのタイミングに同期されているので、
     LocalMapping内に閉じることができそう
+
+## メモ 2024/11/15
+
+- IMUを使っているかの情報について
+  - Atlas::SetImuInitialized()
+    - mpCurrentMap->SetImuInitialized()
+  - Atlas::IsImuInitialized()
+    - mpCurrentMap->IsImuInitialized()
+  - Atlas::IsInertial()
+    - mpCurrentMap->IsInertial()
+      - return map.mbInertial
+  - Atlas::SetInertialSensor()
+    - mpCurrentMap->SetInertialSensor()
+      - map.mbInertial = true
+  - Map::IsInertial()
+    - 呼び出し元
+      - Atlas, LoopClosing
+  - Map::SetInertailSensor()
+    - 呼び出し元
+      - Atlas
