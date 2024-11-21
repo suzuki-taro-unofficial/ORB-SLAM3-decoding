@@ -186,3 +186,60 @@ up-to-scaleをスケールを除いてと訳したが本当の意味は？
 - future works
   - トランザクションのキャンセルしたいね
   - 共有メモリをみてフィルターとか？
+
+# FRP-Bridge
+
+FRPとnon-FRPなプログラムの橋渡しをヘルパークラスを用いて行う
+
+以下のようなFRPのネットワークを構築する構造体があると仮定する。
+
+```c++
+struct FA {
+    static FA Build(sodium::stream<int> sa) : ca(sa.hold(0)) {}
+    sodium::cell<int> ca;
+};
+```
+
+ここで、FRPの入力と出力をnon-FRPなものに変更する以下の構造体を導入する
+
+```c++
+struct FAInputBridge {
+    sodium::stream_sink<int> ssa;
+    void SetA(int a) { ssa.send(a); }
+};
+
+struct FAOutputBridge {
+    FAOutputBridge(sodium::cell<int> ca) : a(0) {
+        ca.listen([](int x) { a = x; });
+    }
+
+    int GetA() {
+        return a;
+    }
+
+private:
+    int a;
+}
+```
+
+これを用いて、以下のような構築を行う
+
+```c++
+std::pair<FAInputBridge, FAOutputBridge> Construct() {
+    FAInputBridge fa_ib;
+    FA fa = FA::Build(fa_ib.ssa);
+    FAOutputBridge fa_ob(fa.ca);
+    return std::makr_pair<FAInputBridge, FAOutputBridge>(fa_ib, fa_ob);
+}
+```
+
+最後に、FRPでないモジュールで以下のようにFRPを操作する
+
+```c++
+void NonFRP_OperateForFA(FAInputBridge &fa_ib, FAOutputBridge &fa_ob) {
+    fa_ib.SetA(10);
+    ...
+    int get = fa_ob.GetA();
+    ...
+}
+```
