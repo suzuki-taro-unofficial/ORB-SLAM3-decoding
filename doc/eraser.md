@@ -142,3 +142,13 @@ shared libraryが見つからないとのことだが、lddでみてみるとち
   - Map::SetInertailSensor()
     - 呼び出し元
       - Atlas
+
+## メモ 2024/11/23
+
+- FRPで表現不可能な処理をどうするか
+  - LocalMapping::InteraptBA()
+    - LocalBAなど一部の処理をキャンセルするためのフラグを立てる
+    - 共有メモリへの書き込みと読み取りでトランザクションを強制終了するなどするしか無い
+  - LocalMapping::IsInitializing()
+    - IMUの初期化処理の最中かどうかが返り、これによってTrackingの処理が変わる
+    - これも共有メモリを書き込むなどするしか無い
