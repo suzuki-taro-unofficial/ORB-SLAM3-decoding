@@ -152,3 +152,4 @@ shared libraryが見つからないとのことだが、lddでみてみるとち
   - LocalMapping::IsInitializing()
     - IMUの初期化処理の最中かどうかが返り、これによってTrackingの処理が変わる
     - これも共有メモリを書き込むなどするしか無い
+    - mutexのtry_lockを用いる方法がある
