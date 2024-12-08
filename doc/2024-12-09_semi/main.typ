@@ -59,7 +59,7 @@
   )
 ]
 
-= ORB-SLAM3について
+= ORB-SLAM3
 
 - ORB-SLAM3がなにか（必要？
 - 全体像
@@ -68,15 +68,15 @@
 
 とか？
 
-= FRPについて
+= 並列FRP
 
 == 用語
 
-今回、FRPについて以下のように用語を定義する。
+今回、FRPの基本的な説明は省略し、用語については以下のように定義する。
 
 #table(
   columns: (auto, auto),
-  inset: 10pt,
+  inset: 6pt,
   align: horizon,
   table.header(
     [*用語*], [*意味*]
