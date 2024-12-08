@@ -231,10 +231,31 @@ GBAをFRPの外で起動し、そのスレッドの管理をセルを通じて�
 ネットワークへ渡すStreamSinkを持ち、
 sendを行う関数群を用いてネットワークへの入力を行う。
 
+```cpp
+struct InputBridge {
+  InputBridge();
+  void doSomething(int value) { ssink_doSomething.send(value); }
+  sodium::stream<int> ssink_doSomething;
+};
+```
+
 == OutputBridge
 
 ネットワークの出力ストリーム・セルをlistenし、
 内部で変数を書き換えそれをゲッターを用いて取得する。
+
+```cpp
+struct OutputBridge {
+  OutputBridge(sodium::stream<int> s, sodium::cell<int> c) {
+    s.listen([](int x) { sv = x; });
+    c.listen([](int x) { cv = x; });
+  }
+  int get_sv(void) { return sv; }
+  int get_cv(void) { return cv; }
+private:
+  int sv, cv;
+};
+```
 
 = どっかに入れたほうが良いかも？
 
