@@ -2,12 +2,26 @@
 #import "@preview/codly:1.1.1": *
 #import "@preview/codly-languages:0.1.1": *
 #show: codly-init.with()
-#codly(languages: codly-languages)
+ #codly(languages: codly-languages)
 
-#let title = [共有会資料]
+#let title = [ORB-SLAM3 FRP化 共有会資料]
 #let author = [加藤 豪, 藤原 遼, 八巻 輝星]
 
 #set heading(numbering: "1.1.1.")
+#show heading.where(): it => {
+  block(width: 100%)[
+    #if (it.level == 1) {
+      text(it, size: 16pt)
+    } else if (it.level == 2) {
+      text(it, size: 12pt)
+    } else if (it.level == 3) {
+      text(it, size: 10pt)
+    }
+    #v(-0.3cm)
+    #line(length: 100%, stroke: gray)
+    #v(0.3cm)
+  ]
+}
 
 #set text(
   size: 10pt,
@@ -19,7 +33,7 @@
   float: true,
   scope: "parent",
 )[
-  #align(center, text(18pt)[
+  #align(center, text(20pt)[
     #title
   ])
   #v(-1em)
@@ -55,9 +69,34 @@
 - 概要
   - クラスタの概念を追加してクラスタ間を並列化させたFRPであること
 
-現在、大本先輩が並列処理が可能なFRP
+現在、大本先輩が並列処理可能なFRPライブラリ(以降prf)を制作している。
+
+prfは基本的にSodiumと同じインタフェースと動作を提供する。
+
+そこにクラスタという新規の概念を追加し、そのクラスタ同士を並列に実行することができる。
 
 == クラスタ
+
+クラスタとはプリミティブ操作の集合である。
+また各ストリーム、セルはプリミティブと同一の
+
+prfのユーザはクラスタを明示的に宣言することによって、プリミティブ操作の集合を定義できる。
+
+```java
+// 暗黙的なクラスタ０
+Stream<int> s1;
+Stream<double> s2;
+
+// 明示的なクラスタ１
+Cluster cluster1;
+Stream<int> s3 = s1.map((v) => v * v);
+Stream<double> s4 = s2.filter((v) => v > 10.0);
+Stream<double> s5 = s1.merge(s2, (v1, v2) => v1 + v2);
+cluster1.close();
+// クラスタ１の終了
+
+// 暗黙的なクラスタ２
+```
 
 - クラスタとはなにか
 - クラスタとトランザクションの関係性
@@ -240,10 +279,31 @@ GBAをFRPの外で起動し、そのスレッドの管理をセルを通じて�
 ネットワークへ渡すStreamSinkを持ち、
 sendを行う関数群を用いてネットワークへの入力を行う。
 
+```cpp
+struct InputBridge {
+  InputBridge();
+  void doSomething(int value) { ssink_doSomething.send(value); }
+  sodium::stream<int> ssink_doSomething;
+};
+```
+
 == OutputBridge
 
 ネットワークの出力ストリーム・セルをlistenし、
 内部で変数を書き換えそれをゲッターを用いて取得する。
+
+```cpp
+struct OutputBridge {
+  OutputBridge(sodium::stream<int> s, sodium::cell<int> c) {
+    s.listen([](int x) { sv = x; });
+    c.listen([](int x) { cv = x; });
+  }
+  int get_sv(void) { return sv; }
+  int get_cv(void) { return cv; }
+private:
+  int sv, cv;
+};
+```
 
 = どっかに入れたほうが良いかも？
 
