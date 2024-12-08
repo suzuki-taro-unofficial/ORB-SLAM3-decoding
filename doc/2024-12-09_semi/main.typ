@@ -122,9 +122,18 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
   - マップ全体の最適化を行うモジュール。
   - FRPの外で動作するGBAを行っているスレッドを管理する。
 
+== ORB-SLAM3にのみ存在する機能
+
+- Atlasのセーブ/ロード
+  - 存在するが、使われていなく動作が不明瞭だった。
+  - 機能を削除しても動作に支障が出ないため削除した。
+- LocalMappingの実行の有効無効の切り替え
+  - 実装にはネットワークを止める（もしくは類似する）動作が必要。
+  - 実装に時間がかかりそうなので、必要になったら追加する。
+
 = 各モジュールの詳細
 
-==  LocalMapping
+== LocalMapping
 
 // ![ネットワーク図:LocalMapping]()
 
@@ -143,9 +152,6 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
     LoopClosingのネットワーク
   ]
 )
-
-=== 動作
-
 === 入力
 
 - s_tick
@@ -193,13 +199,39 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 - c_detectInfo
   - Detectorで得られた情報を、ループとじ込みやMergeに渡すためのセル
 
-=== 詳細な動作
+== 動作
 
-==== Detect
+=== Detect
+1. QueueからKFをpopする。
+2. DetectorでそのKFに対してループやMergeの検出を行う。
+  - 主にBoW（Bag-of-Words)によってループやDetectの検出を行う。
+  - 前回KFで部分的に検出があれば、Sim3変換による検出も行う。
+  - ループとMergeは同じ方法で検出される。
+    - 同じ地図で検出されたらループ、違う地図で検出されたらMerge
+3. ループやMergeが検出されたら以下の動作を行う
+  - c_stopLMをtrueにする
+  - c_modeを検出された処理に変更する
+  - GBAが動いているのであれば、s_stopGBAを発火し、GBAを止める。
+  - 一部の情報を、c_detectorInfoに保存する。
+
+=== CorrectLoop
+- 内部ではCovisibility Graphの更新や、ループ辺の追加を行う。
+- 処理が終了したら、
+  - s_runGBA を発火
+  - c_modeをDetectにする
+  - c_stopLMをfalseにする。
+
+=== Merge
+- 地図の統合を行う。
+- 処理が終了したら、
+  - c_modeをDetectにする
+  - c_stopLMをfalseにする。
+  - Detect時にGBAを止めていたなら、s_runGBAを発火する。
 
 === 元のLoopClosingとの差異
 
-- GBAをループクロージング内で実行していたが、GBAManagerを新たに作成しそこに委託するようにした。
+- 元の実装ではc_modeのような状態を持っていない。FRPではwhileとsleepで外部の変化を待つことができないため、外部の状態の変更を待つ必要のある処理をmodeで分けることで、外部の状態の変更をtickごとに待つことができるようにした。
+- GBAをループクロージング内でスレッドを立てて実行していたが、GBAManagerに委託するようにした。
 
 == GBAManager
 
@@ -308,6 +340,5 @@ private:
 = どっかに入れたほうが良いかも？
 
 - かたみ先輩のほうでキューを使ってネットワークの接続を切り離していたこと、今回その必要がないこと
-- 一部機能を消していること
 - 図の記法について
   - セルの矢印が違ったりとか
