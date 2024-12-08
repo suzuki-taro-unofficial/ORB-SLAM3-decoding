@@ -8,7 +8,7 @@
 #let author = [加藤 豪, 藤原 遼, 八巻 輝星]
 
 #set heading(numbering: "1.1.1.")
-#show heading.where(): it => {
+#show heading: it => {
   block(width: 100%)[
     #if (it.level == 1) {
       text(it, size: 16pt)
