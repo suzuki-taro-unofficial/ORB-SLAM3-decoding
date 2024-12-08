@@ -2,7 +2,8 @@
 #import "@preview/codly:1.1.1": *
 #import "@preview/codly-languages:0.1.1": *
 #show: codly-init.with()
- #codly(languages: codly-languages)
+#codly(languages: codly-languages)
+#codly(zebra-fill: none)
 
 #let title = [ORB-SLAM3 FRP化 共有会資料]
 #let author = [加藤 豪, 藤原 遼, 八巻 輝星]
