@@ -56,20 +56,11 @@
     ]
   )
   #v(1.5em)
-  #outline(depth: 1, indent: 12pt)
+  #outline(depth: 2, indent: 12pt)
   #v(1.5em)
 ]
 
-= ORB-SLAM3
-
-- ORB-SLAM3がなにか（必要？
-- 全体像
-- 各モジュールの働き
-- モジュール同士の連携
-
-とか？
-
-#include ("parallel-frp.typ")
+#include "prerequisite-knowledge/main.typ"
 
 = 今回の実装方針
 
