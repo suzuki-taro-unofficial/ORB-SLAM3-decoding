@@ -4,17 +4,44 @@
 #show: codly-init.with()
  #codly(languages: codly-languages)
 
+#let title = [共有会資料]
+#let author = [加藤 豪, 藤原 遼]
+
+#set heading(numbering: "1.1.1.")
+
 #set text(
   size: 10pt,
   lang: "ja",
   font: ("IPAMincho")
 )
+#place(
+  top + center,
+  float: true,
+  scope: "parent",
+)[
+  #align(center, text(18pt)[
+    #title
+  ])
+  #v(-1em)
+  #line(length: 100%)
+  #grid(
+    columns: (1fr, 1fr),
+    align(left)[
+      #text(12pt)[
+        2024/12/09
+      ]
+    ],
+    align(right)[
+      #text(12pt)[
+        #author
+      ]
+    ]
+  )
+]
 
-= 2024/12/09 共有会資料
 
-====== 作成: 加藤 豪, 藤原 遼
 
-== ORB-SLAM3について
+= ORB-SLAM3について
 
 - ORB-SLAM3がなにか（必要？
 - 全体像
@@ -23,7 +50,7 @@
 
 とか？
 
-== 並列FRPについて
+= 並列FRPについて
 
 - 概要
   - クラスタの概念を追加してクラスタ間を並列化させたFRPであること
@@ -34,7 +61,7 @@ prfは基本的にSodiumと同じインタフェースと動作を提供する�
 
 そこにクラスタという新規の概念を追加し、そのクラスタ同士を並列に実行することができる。
 
-=== クラスタ
+== クラスタ
 
 クラスタとはプリミティブ操作の集合である。
 また各ストリーム、セルはプリミティブと同一の
@@ -60,16 +87,16 @@ cluster1.close();
 - クラスタとはなにか
 - クラスタとトランザクションの関係性
 
-=== クラスタ間の接続
+== クラスタ間の接続
 
 - クラスタを接続した際の動作
 
-=== グローバルセルループ
+== グローバルセルループ
 
 - グローバルセルループがなにか
 - グローバルセルループの制約について
 
-== 方針
+= 方針
 
 大前提となる方針について簡単に。
 
@@ -78,7 +105,7 @@ cluster1.close();
   - Map,KeyFrame,MapPointをコピーできない理由、しなくてもいい理由、してはいけない理由
   - Atlasに対する副作用が大丈夫な理由、無いとだめな理由
 
-== 全体像
+= 全体像
 
 // ![ネットワーク図:全体像]()
 
@@ -90,7 +117,7 @@ cluster1.close();
 - クラスタの分け方
 - グローバルループ
 
-== LocalMapping
+= LocalMapping
 
 // ![ネットワーク図:LocalMapping]()
 
@@ -101,34 +128,57 @@ cluster1.close();
 
 その他注意点・工夫点折り込みつつ
 
-== LoopClosing
+= LoopClosing
 
 #figure(
   image("images/LoopClosingFRP.png")
 )
-=== 動作
-=== 入力
+== 動作
+== 入力
 - s_tick
-  - Systemから送られるtickストリーム、
+  - Systemから送られるunitのストリーム。
+  - 5秒おきに発火。
 - s_insertKF
-  - LMから送られるKFのストリーム、キューに蓄えられる。
+  - LMから送られるKFのストリーム。
+  - キューに蓄えられる。
 - s_resetActiveMap
-  - 
+  - Trackingから送られるストリーム。
+  - Mapのポインタを持っている。
 - c_stopLC
+  - GBAManagerが持つセル。
+  - boolの値を持ち、trueの時、LCの動作を停止する。
+  - 並列FRPではグローバルストリームループができないため、セルで実装している。
 - c_activeLC
+  - Systemが持つセル。
+  - boolの値を持ち、falseの時、LCは行なわれない。
 - c_LMisStopped
-- c_GBAAisRunning
-=== 出力
+  - LMが持つセル。
+  - trueの時、LMが停止している。
+- c_GBAisRunning
+  - GBAが行なわれているかのセル。
+  - 通常Merge語にはGBAを行なわないが、GBAの途中でMergeを検出しGBAが停止した場合、Mergeの終了後GBAを行う。
+
+== 出力
+
 - s_stopGBA
+  - GBAを停止させるunitのストリーム。
 - s_runGBA
+  - GBAを実行させるストリーム。
+  - mapのポインタとKFのIDを持つ。
 - c_stopLM
-- c_LMisStopped
-=== 詳細
-=== 元のLocalMappingとの差異
+  - LMを停止させるかどうかのセル
+  - boolの値を持ち、trueのとき、LMを停止させる。
+- c_LCisStopped
+  - LCが停止したかどうかのセル
+  - boolの値を持ちtrueのとき、LCが停止している。
+
+== 詳細
+
+== 元のLocalMappingとの差異
 
 その他注意点・工夫点折り込みつつ
 
-== GBAManager
+= GBAManager
 
 #figure(
   image("images/GBAManager.png"),
@@ -137,7 +187,7 @@ cluster1.close();
   ]
 )
 
-=== 状態
+== 状態
 
 - c_thread
   - GBAが起動しているなら、そのスレッドを保持する
@@ -146,7 +196,7 @@ cluster1.close();
 - c_runInfo
   - GBAを起動させることができる際に起動のための情報を保持する
 
-=== 入力
+== 入力
 
 入力として以下のストリームとセルを受け取る
 
@@ -162,7 +212,7 @@ cluster1.close();
 - c_isLCStopped
   - ループクロージングが停止しているかを保持するセル
 
-=== 出力
+== 出力
 
 出力として以下のストリームが存在する
 
@@ -173,7 +223,7 @@ cluster1.close();
 - c_running
   - GBAが動作している際にtrueとなるセル
 
-=== 動作
+== 動作
 
 動作は主にs_tickによって行われ、以下のようになっている。
 
@@ -191,11 +241,27 @@ cluster1.close();
   - c_updateInfoに情報が無いなら何も行わない
   - そうでないなら、上と同じ動作を行う
 
-== Tracking
+== 注意点
 
-- 変更点
+GBAをネットワークにすると、GBAを停止するという動作がFRPで表現できないため、
+GBAをFRPの外で起動し、そのスレッドの管理をセルを通じて行うようにしている。
 
-== どっかに入れたほうが良いかも？
+= Tracking
+
+今回TrackingはFRPにしないが、FRPと連携して動く必要があるため、
+後述するInputBridgeとOutputBridgeを用いて各モジュールの関数呼び出しを置換した。
+
+== InputBridge
+
+ネットワークへ渡すStreamSinkを持ち、
+sendを行う関数群を用いてネットワークへの入力を行う。
+
+== OutputBridge
+
+ネットワークの出力ストリーム・セルをlistenし、
+内部で変数を書き換えそれをゲッターを用いて取得する。
+
+= どっかに入れたほうが良いかも？
 
 - かたみ先輩のほうでキューを使ってネットワークの接続を切り離していたこと、今回その必要がないこと
 - 一部機能を消していること
