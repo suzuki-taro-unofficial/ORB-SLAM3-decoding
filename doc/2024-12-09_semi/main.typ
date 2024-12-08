@@ -78,9 +78,9 @@
 3に関しても実装量の削減のためや、副作用が多く存在しFRP化が難しいなどの理由で実装を行わない方針となった。
 4に関しては元の並列処理において複数スレッド間で同時に参照・編集を行っていた部分であるため、ここの副作用を取り除いてしまうとORB-SLAM3として正常な動作が望めないと判断し副作用を残す方針となった。
 
-= 全体像
+= FRP化されたORB-SLAM3の全体像
 
-FRP化されたORB_SLAM3（以降ORB_SLAM3_FRP）全体のネットワーク図は以下のようになる。
+FRP化されたORB-SLAM3（以降ORB_SLAM3_FRP）全体のネットワーク図は以下のようになる。
 
 #figure(
   image("images/Overall.png"),
@@ -156,7 +156,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 
 - s_tick
   - Systemから送られるunitのストリーム。
-  - 5秒おきに発火。
+  - 5ミリ秒おきに発火。
 - s_insertKF
   - LMから送られるKFのストリーム。
   - キューに蓄えられる。
@@ -306,7 +306,11 @@ GBAをFRPの外で起動し、そのスレッドの管理をセルを通じて�
 == Tracking
 
 今回TrackingはFRPにしないが、FRPと連携して動く必要があるため、
-後述するInputBridgeとOutputBridgeを用いて各モジュールの関数呼び出しを置換した。
+後述するInputBridgeとOutputBridgeを用いて各モジュールに対する処理を置換した。
+
+置換した処理としては以下の通り
+
+- TODO
 
 === InputBridge
 
@@ -317,7 +321,7 @@ sendを行う関数群を用いてネットワークへの入力を行う。
 struct InputBridge {
   InputBridge();
   void doSomething(int value) { ssink_doSomething.send(value); }
-  sodium::stream<int> ssink_doSomething;
+  sodium::stream<int> s_doSomething;
 };
 ```
 
