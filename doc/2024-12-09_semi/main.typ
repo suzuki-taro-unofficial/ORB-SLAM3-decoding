@@ -121,7 +121,12 @@ cluster1.close();
 
 = 全体像
 
-// ![ネットワーク図:全体像]()
+#figure(
+  image("images/Overall.png"),
+  caption: [
+    全体のネットワーク
+  ]
+)
 
 - 各モジュールの概要
   - 働き
