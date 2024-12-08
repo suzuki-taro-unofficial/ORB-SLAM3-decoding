@@ -199,7 +199,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 - c_detectInfo
   - Detectorで得られた情報を、ループとじ込みやMergeに渡すためのセル
 
-== 動作
+=== 動作
 
 === Detect
 
