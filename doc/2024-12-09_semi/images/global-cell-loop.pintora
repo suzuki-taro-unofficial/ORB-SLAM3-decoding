@@ -1,0 +1,27 @@
+dotDiagram
+  digraph G2 {
+    bgcolor="#faf5f5";
+    node [color="#111"]
+
+    subgraph C1 {
+      label="クラスタ0"
+      s1;
+      c1 [color=red];
+    }
+
+    subgraph C2 {
+      label="クラスタ1"
+      s3;
+    }
+
+    subgraph C3 {
+      label="クラスタ2"
+      c2;
+    }
+
+    s1 -> s3;
+    c1 -> s3;
+    s3 -> c2;
+    c2 -> c1 [color=red];
+  }
+

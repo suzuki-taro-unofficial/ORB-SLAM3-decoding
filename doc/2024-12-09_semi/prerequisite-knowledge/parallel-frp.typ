@@ -5,10 +5,6 @@
 #codly(languages: codly-languages)
 #codly(zebra-fill: none)
 
-// グラフ描画
-#import "@preview/pintorita:0.1.2"
-#show raw.where(lang: "pintora"): it => pintorita.render(it.text)
-
 == 並列FRP
 
 === 用語
@@ -47,38 +43,12 @@ prfでは時変値の依存グラフをクラスタと呼ばれるものに切�
 
 以下に複数のクラスタに分割された依存グラフの例を示す。
 
-```pintora
-dotDiagram
-  digraph G {
-    bgcolor="#faf5f5";
-    node [color="#111",bgcolor=orange]
-
-    subgraph C1 {
-      label="クラスタ0"
-      s1;
-      s2;
-    }
-
-    subgraph C2 {
-      label="クラスタ1"
-      s3;
-      s4;
-      s5;
-    }
-
-    subgraph C3 {
-      label="クラスタ2"
-      s6;
-    }
-
-    s1 -> s3;
-    s2 -> s4;
-    s3 -> s5;
-    s4 -> s5;
-    s5 -> s6;
-  }
-```
-
+#figure(
+  image("../images/cluster-diaglam.svg"),
+  caption: [
+    クラスタ
+  ]
+)
 あるトランザクションにおいて更新しなければならない時変値は、その依存グラフから求められる。
 そしてprfではトランザクションによる更新処理がクラスタと各時変値の2段階になっている。
 
@@ -120,34 +90,12 @@ Stream<String> s6 = s5.map((v) => v.toString());
 クラスタを跨いだセルループについてはグローバルセルループ（仮名）という特別なものとなる。
 以下にグローバルセルループを含む依存グラフの例を示す。赤いノードがグローバルセルループで、赤い矢印はグローバルセルループの依存である。
 
-```pintora
-dotDiagram
-  digraph G2 {
-    bgcolor="#faf5f5";
-    node [color="#111"]
-
-    subgraph C1 {
-      label="クラスタ0"
-      s1;
-      c1 [color=red];
-    }
-
-    subgraph C2 {
-      label="クラスタ1"
-      s3;
-    }
-
-    subgraph C3 {
-      label="クラスタ2"
-      c2;
-    }
-
-    s1 -> s3;
-    c1 -> s3;
-    s3 -> c2;
-    c2 -> c1 [color=red];
-  }
-```
+#figure(
+  image("../images/global-cell-loop.svg"),
+  caption: [
+    グローバルセルループ
+  ]
+)
 
 グローバルセルループで接続されたクラスタ、時変値に関してはprfの動作時には依存として扱われない。
 すなわち先程の図において、あるトランザクションによってクラスタ２の更新が発生した場合以下のような動作をする。
