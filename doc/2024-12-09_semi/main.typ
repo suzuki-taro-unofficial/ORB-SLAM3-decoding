@@ -5,7 +5,7 @@
 #codly(languages: codly-languages)
 
 #let title = [共有会資料]
-#let author = [加藤 豪, 藤原 遼]
+#let author = [加藤 豪, 藤原 遼, 八巻 輝星]
 
 #set heading(numbering: "1.1.1.")
 
@@ -147,11 +147,20 @@
   - LCが停止したかどうかのセル
   - boolの値を持ちtrueのとき、LCが停止している。
 
-== 詳細
+== 内部セル
+- c_mode
+  - Detect、CorrectLoop、Mergeの３種の状態を持つ。
+  - この状態によって、tickを受け取った後の動作が決まる。
+- c_detectInfo
+  - Detectorで得られた情報を、ループとじ込みやMergeに渡すためのセル
 
-== 元のLocalMappingとの差異
+== 詳細な動作
+=== Detect
 
-その他注意点・工夫点折り込みつつ
+
+== 元のLoopClosingとの差異
+
+- GBAをループクロージング内で実行していたが、GBAManagerを新たに作成しそこに委託するようにした。
 
 = GBAManager
 
