@@ -1,3 +1,9 @@
+// コードブロックをいい感じにスタイリングしてくれる
+#import "@preview/codly:1.1.1": *
+#import "@preview/codly-languages:0.1.1": *
+#show: codly-init.with()
+#codly(languages: codly-languages)
+
 #set text(
   size: 10pt,
   lang: "ja",
