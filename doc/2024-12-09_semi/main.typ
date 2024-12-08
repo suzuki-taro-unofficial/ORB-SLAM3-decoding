@@ -128,13 +128,15 @@ cluster1.close();
   ]
 )
 
-- 各モジュールの概要
-  - 働き
-  - 入力・出力
-- 動作
-- 元のORB-SLAM3との違い
-- クラスタの分け方
-- グローバルループ
+== 動作
+
+各モジュールは独立したティックの発火で動作する。
+
+== 元のORB-SLAM3との違い
+
+== クラスタの分け方
+
+== グローバルループ
 
 = LocalMapping
 
@@ -150,9 +152,14 @@ cluster1.close();
 = LoopClosing
 
 #figure(
-  image("images/LoopClosingFRP.png")
+  image("images/LoopClosingFRP.png"),
+  caption: [
+    LoopClosingのネットワーク
+  ]
 )
+
 == 動作
+
 == 入力
 - s_tick
   - Systemから送られるunitのストリーム。
@@ -199,8 +206,8 @@ cluster1.close();
   - Detectorで得られた情報を、ループとじ込みやMergeに渡すためのセル
 
 == 詳細な動作
-=== Detect
 
+=== Detect
 
 == 元のLoopClosingとの差異
 
