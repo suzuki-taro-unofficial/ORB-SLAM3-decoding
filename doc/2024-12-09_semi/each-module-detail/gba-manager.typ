@@ -1,7 +1,7 @@
 == GBAManager
 
 #figure(
-  image("images/GBAManager.png"),
+  image("../images/GBAManager.png"),
   caption: [
     GBAManagerのネットワーク
   ]

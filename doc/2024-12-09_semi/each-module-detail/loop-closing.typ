@@ -1,7 +1,7 @@
 == LoopClosing
 
 #figure(
-  image("images/LoopClosingFRP.png"),
+  image("../images/LoopClosingFRP.png"),
   caption: [
     LoopClosingのネットワーク
   ]
