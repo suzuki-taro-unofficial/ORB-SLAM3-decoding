@@ -80,12 +80,31 @@
 
 = 全体像
 
+FRP化されたORB_SLAM3（以降ORB_SLAM3_FRP）全体のネットワーク図は以下のようになる。
+
 #figure(
   image("images/Overall.png"),
   caption: [
     全体のネットワーク
   ]
 )
+
+全体の動作は、TrackingのメソッドがORB_SLAM3_FRP外部(ユーザ)から呼び出されることから始まる。
+この呼び出しの際にTrackingはIMUデータとフレーム（画像）データを基に3D点の復元などを行い、キーフレームを作成する。
+作成されたキーフレームをLocalMappingInputBridgeを介してLocalMappingに渡す。
+LocalMappingは専用の作動ストリームを受けてTrackingからもらったキーフレームを処理し、処理の終わったキーフレームをLoopClosingにわたす。
+最後に、LoopClosingがループやマージの検出と統合の処理を行い、状況に応じて
+マップ全体の最適化をGBAManagerを用いて行う。
+
+ここで、LocalMapping,LoopClosing,GBAManagerは独立した作動開始ストリームの発火で動作しており、本動作はそれぞれ非同期に実行される。
+
+クラスタの分割としては、以下のように切り分けられている。
+
+- `LMInputBridge`, `LocalMapping`, `LMOutputBridge`で１つ
+- `LCInputBridge`, `LoopClosing`で１つ
+- `GBAManager`で１つ
+
+またTrackingはメインスレッドで動作するため、上の３つとTrackingも非同期で動作する。
 
 == 各モジュールの概要
 
@@ -102,19 +121,6 @@
 - GBAManager
   - マップ全体の最適化を行うモジュール。
   - FRPの外で動作するGBAを行っているスレッドを管理する。
-
-== 動作
-
-全体としては、Trackingのメソッドが外部から呼び出されることから始まる。
-Trackingが入力を処理してキーフレームにしたものをLMInputBridgeを介して
-LocalMappingに渡す。
-その後、LocalMappingがキーフレームに最適化を施した後にそのキーフレームを
-LoopClosingにわたす。
-最後に、LoopClosingがループやマージの検出と統合の処理を行い、状況に応じて
-マップ全体の最適化をGBAManagerを用いて行う。
-
-ここで、各モジュールは独立したティックの発火で動作しており、各モジュール間の
-データの受け渡しはストリームで行われる。
 
 = 各モジュールの詳細
 
