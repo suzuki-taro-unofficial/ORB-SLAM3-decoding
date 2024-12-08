@@ -202,6 +202,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 == 動作
 
 === Detect
+
 1. QueueからKFをpopする。
 2. DetectorでそのKFに対してループやMergeの検出を行う。
   - 主にBoW（Bag-of-Words)によってループやDetectの検出を行う。
@@ -215,6 +216,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
   - 一部の情報を、c_detectorInfoに保存する。
 
 === CorrectLoop
+
 - 内部ではCovisibility Graphの更新や、ループ辺の追加を行う。
 - 処理が終了したら、
   - s_runGBA を発火
@@ -222,6 +224,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
   - c_stopLMをfalseにする。
 
 === Merge
+
 - 地図の統合を行う。
 - 処理が終了したら、
   - c_modeをDetectにする
