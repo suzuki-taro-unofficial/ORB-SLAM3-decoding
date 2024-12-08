@@ -9,17 +9,17 @@
 
 動作は主にs_tickによって行われ、以下のようになっている。
 
-- c_runInfoに情報がある
+- c_runInfoに情報がある場合
   - c_updateInfoに情報がない場合
     - 新たにスレッドを起動する
     - この際、別スレッドが走っているなら止めてから起動する
-  - c_updateInfoに情報がある
+  - c_updateInfoに情報がある場合
     - c_isLMStoppedがfalse
       - LMに対して停止を要求するストリームを発火させる
     - c_isLMStoppedがtrue
       - 情報を用いてキーフレームやマップポイントの情報を更新する
       - 更新後、LMの再開を要求するストリームを発火させる
-- c_runInfoに情報が無い
+- c_runInfoに情報が無い場合
   - c_updateInfoに情報が無いなら何も行わない
   - そうでないなら、上と同じ動作を行う
 
