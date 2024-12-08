@@ -2,7 +2,7 @@
 #import "@preview/codly:1.1.1": *
 #import "@preview/codly-languages:0.1.1": *
 #show: codly-init.with()
-#codly(languages: codly-languages)
+ #codly(languages: codly-languages)
 
 #set text(
   size: 10pt,
@@ -28,9 +28,34 @@
 - 概要
   - クラスタの概念を追加してクラスタ間を並列化させたFRPであること
 
-現在、大本先輩が並列処理が可能なFRP
+現在、大本先輩が並列処理可能なFRPライブラリ(以降prf)を制作している。
+
+prfは基本的にSodiumと同じインタフェースと動作を提供する。
+
+そこにクラスタという新規の概念を追加し、そのクラスタ同士を並列に実行することができる。
 
 === クラスタ
+
+クラスタとはプリミティブ操作の集合である。
+また各ストリーム、セルはプリミティブと同一の
+
+prfのユーザはクラスタを明示的に宣言することによって、プリミティブ操作の集合を定義できる。
+
+```java
+// 暗黙的なクラスタ０
+Stream<int> s1;
+Stream<double> s2;
+
+// 明示的なクラスタ１
+Cluster cluster1;
+Stream<int> s3 = s1.map((v) => v * v);
+Stream<double> s4 = s2.filter((v) => v > 10.0);
+Stream<double> s5 = s1.merge(s2, (v1, v2) => v1 + v2);
+cluster1.close();
+// クラスタ１の終了
+
+// 暗黙的なクラスタ２
+```
 
 - クラスタとはなにか
 - クラスタとトランザクションの関係性
