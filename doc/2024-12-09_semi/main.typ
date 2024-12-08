@@ -7,6 +7,31 @@
 #let title = [ORB-SLAM3 FRP化 共有会資料]
 #let author = [加藤 豪, 藤原 遼, 八巻 輝星]
 
+#set page(header: context {
+  let selector = selector(heading).before(here())
+  let level = counter(selector)
+  let headings = query(selector)
+  if headings.len() == 0 {
+    return
+  }
+  let heading = headings.last()
+
+if counter(page).get().first() > 1 [
+    #h(1fr)
+    #level.display(heading.numbering)
+    #heading.body
+  ]
+})
+
+#set page(footer: context [
+  #title
+  #h(1fr)
+  #counter(page).display(
+    "1/1",
+    both: true,
+  )
+])
+
 #set heading(numbering: "1.1.1.1.")
 #show heading: it => {
   block(width: 100%)[
