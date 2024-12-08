@@ -104,7 +104,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 - `LCInputBridge`, `LoopClosing`で１つ
 - `GBAManager`で１つ
 
-またTrackingはメインスレッドで動作するため、上の３つとTrackingも非同期で動作する。
+またTrackingの本動作はメインスレッドで動作するため、上の３つとTrackingも非同期で動作する。
 
 == 各モジュールの概要
 
