@@ -4,10 +4,24 @@
 #show: codly-init.with()
  #codly(languages: codly-languages)
 
-#let title = [共有会資料]
+#let title = [ORB-SLAM3 FRP化 共有会資料]
 #let author = [加藤 豪, 藤原 遼]
 
 #set heading(numbering: "1.1.1.")
+#show heading.where(): it => {
+  block(width: 100%)[
+    #if (it.level == 1) {
+      text(it, size: 16pt)
+    } else if (it.level == 2) {
+      text(it, size: 12pt)
+    } else if (it.level == 3) {
+      text(it, size: 10pt)
+    }
+    #v(-0.3cm)
+    #line(length: 100%, stroke: gray)
+    #v(0.3cm)
+  ]
+}
 
 #set text(
   size: 10pt,
@@ -19,7 +33,7 @@
   float: true,
   scope: "parent",
 )[
-  #align(center, text(18pt)[
+  #align(center, text(20pt)[
     #title
   ])
   #v(-1em)
