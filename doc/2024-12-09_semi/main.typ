@@ -73,7 +73,7 @@
 == LoopClosing
 
 #figure(
-  image("../images/LoopClosingFRP.png")
+  image("images/LoopClosingFRP.png")
 )
 === 動作
 === 入力
@@ -100,7 +100,7 @@
 == GBAManager
 
 #figure(
-  image("../images/GBAManager.png"),
+  image("images/GBAManager.png"),
   caption: [
     GBAManagerのネットワーク
   ]
