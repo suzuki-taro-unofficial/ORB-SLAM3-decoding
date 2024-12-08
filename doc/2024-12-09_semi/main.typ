@@ -128,6 +128,22 @@ cluster1.close();
   ]
 )
 
+== 各モジュール
+
+以下のモジュールが存在する
+
+- Tracking
+  - 元のORB-SLAM3のTrackingに、FRPとの橋渡しを行う変更を加えたモジュール。
+  - FRPの外で動作する。
+- LocalMapping
+  - Trackingで作られたキーフレームに対する最適化を行う。
+- LoopClosing
+  - LocalMappingで最適化が施されたキーフレームを元にループとマージの検出を行う。
+  - 後述するGBAManagerを場合によって起動させる。
+- GBAManager
+  - マップ全体の最適化を行うモジュール。
+  - FRPの外で動作するGBAを行っているスレッドを管理する。
+
 == 動作
 
 全体としては、Trackingのメソッドが外部から呼び出されることから始まる。
