@@ -78,20 +78,39 @@
 === 動作
 === 入力
 - s_tick
-  - Systemから送られるtickストリーム、
+  - Systemから送られるunitのストリーム。
+  - 5秒おきに発火。
 - s_insertKF
-  - LMから送られるKFのストリーム、キューに蓄えられる。
+  - LMから送られるKFのストリーム。
+  - キューに蓄えられる。
 - s_resetActiveMap
-  - 
+  - Trackingから送られるストリーム。
+  - Mapのポインタを持っている。
 - c_stopLC
+  - GBAManagerが持つセル。
+  - boolの値を持ち、trueの時、LCの動作を停止する。
+  - 並列FRPではグローバルストリームループができないため、セルで実装している。
 - c_activeLC
+  - Systemが持つセル。
+  - boolの値を持ち、falseの時、LCは行なわれない。
 - c_LMisStopped
-- c_GBAAisRunning
+  - LMが持つセル。
+  - trueの時、LMが停止している。
+- c_GBAisRunning
+  - GBAが行なわれているかのセル。
+  - 通常Merge語にはGBAを行なわないが、GBAの途中でMergeを検出しGBAが停止した場合、Mergeの終了後GBAを行う。
 === 出力
 - s_stopGBA
+  - GBAを停止させるunitのストリーム。
 - s_runGBA
+  - GBAを実行させるストリーム。
+  - mapのポインタとKFのIDを持つ。
 - c_stopLM
-- c_LMisStopped
+  - LMを停止させるかどうかのセル
+  - boolの値を持ち、trueのとき、LMを停止させる。
+- c_LCisStopped
+  - LCが停止したかどうかのセル
+  - boolの値を持ちtrueのとき、LCが停止している。
 === 詳細
 === 元のLocalMappingとの差異
 
