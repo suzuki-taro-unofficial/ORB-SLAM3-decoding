@@ -111,12 +111,15 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 以下のモジュールが存在する
 
 - Tracking
-  - 元のORB-SLAM3のTrackingに、FRPとの橋渡しを行う変更を加えたモジュール。
-  - FRPの外で動作する。
+  - 元のORB-SLAM3のTrackingに、FRPとの橋渡しを行う変更を加えたモジュール
+  - FRPの外で動作する。k
 - LocalMapping
-  - Trackingで作られたキーフレームに対する最適化を行う。
+  - Trackingで作られたキーフレームに対する前処理
+  - 余計なキーフレーム・マップポイントの削除
+  - 局所最適化
 - LoopClosing
-  - LocalMappingで最適化が施されたキーフレームを元にループとマージの検出を行う。
+  - LocalMappingで最適化が施されたキーフレームを元にループとマージの検出を行う
+  - 検出された場合にはそれぞれループとじ込み、マップマージングを行う
   - 後述するGBAManagerを場合によって起動させる。
 - GBAManager
   - マップ全体の最適化を行うモジュール。
