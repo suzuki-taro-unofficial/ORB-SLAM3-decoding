@@ -33,6 +33,7 @@
   lang: "ja",
   font: ("IPAMincho")
 )
+
 #place(
   top + center,
   float: true,
@@ -57,8 +58,6 @@
     ]
   )
 ]
-
-
 
 = ORB-SLAM3について
 
@@ -239,15 +238,34 @@ dotDiagram
   ]
 )
 
+== 各モジュール
+
+以下のモジュールが存在する
+
+- Tracking
+  - 元のORB-SLAM3のTrackingに、FRPとの橋渡しを行う変更を加えたモジュール。
+  - FRPの外で動作する。
+- LocalMapping
+  - Trackingで作られたキーフレームに対する最適化を行う。
+- LoopClosing
+  - LocalMappingで最適化が施されたキーフレームを元にループとマージの検出を行う。
+  - 後述するGBAManagerを場合によって起動させる。
+- GBAManager
+  - マップ全体の最適化を行うモジュール。
+  - FRPの外で動作するGBAを行っているスレッドを管理する。
+
 == 動作
 
-各モジュールは独立したティックの発火で動作する。
+全体としては、Trackingのメソッドが外部から呼び出されることから始まる。
+Trackingが入力を処理してキーフレームにしたものをLMInputBridgeを介して
+LocalMappingに渡す。
+その後、LocalMappingがキーフレームに最適化を施した後にそのキーフレームを
+LoopClosingにわたす。
+最後に、LoopClosingがループやマージの検出と統合の処理を行い、状況に応じて
+マップ全体の最適化をGBAManagerを用いて行う。
 
-== 元のORB-SLAM3との違い
-
-== クラスタの分け方
-
-== グローバルループ
+ここで、各モジュールは独立したティックの発火で動作しており、各モジュール間の
+データの受け渡しはストリームで行われる。
 
 = LocalMapping
 
