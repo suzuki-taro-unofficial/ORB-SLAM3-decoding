@@ -2,19 +2,19 @@
 #import "@preview/codly:1.1.1": *
 #import "@preview/codly-languages:0.1.1": *
 #show: codly-init.with()
- #codly(languages: codly-languages)
-
+#codly(languages: codly-languages)
+#codly(zebra-fill: none)
 #let title = [ORB-SLAM3 FRP化 共有会資料]
 #let author = [加藤 豪, 藤原 遼, 八巻 輝星]
 
-#set heading(numbering: "1.1.1.")
+#set heading(numbering: "1.1.1.1.")
 #show heading: it => {
   block(width: 100%)[
     #if (it.level == 1) {
       text(it, size: 16pt)
     } else if (it.level == 2) {
       text(it, size: 12pt)
-    } else if (it.level == 3) {
+    } else {
       text(it, size: 10pt)
     }
     #v(-0.3cm)
@@ -28,6 +28,10 @@
   lang: "ja",
   font: ("IPAMincho")
 )
+
+#set list(indent: 12pt, body-indent: 0.7em, spacing: 0.8em)
+#set enum(indent: 12pt, body-indent: 0.7em, spacing: 0.8em)
+
 #place(
   top + center,
   float: true,
@@ -51,87 +55,79 @@
       ]
     ]
   )
+  #v(1.5em)
+  #outline(depth: 2, indent: 12pt)
+  #v(1.5em)
 ]
 
+#include "prerequisite-knowledge/main.typ"
 
+= 今回の実装方針
 
-= ORB-SLAM3について
+今回のORB-SLAM3の並列FPRによる実装において大前提となる方針について簡単に述べる。
 
-- ORB-SLAM3がなにか（必要？
-- 全体像
-- 各モジュールの働き
-- モジュール同士の連携
+今回我々は、以下の方針で実装を進めている
 
-とか？
++ LocalMapping、LoopClosingの動作フロー全般をFRPに置き換える
++ Trackingの動作フローは置き換えない
++ Optimizerなどの数値計算部分は置き換えない
++ 内部で扱われる、Atlas、KeyFrame、Map、MapPointなどのデータ構造について副作用を許す
 
-= 並列FRPについて
-
-- 概要
-  - クラスタの概念を追加してクラスタ間を並列化させたFRPであること
-
-現在、大本先輩が並列処理可能なFRPライブラリ(以降prf)を制作している。
-
-prfは基本的にSodiumと同じインタフェースと動作を提供する。
-
-そこにクラスタという新規の概念を追加し、そのクラスタ同士を並列に実行することができる。
-
-== クラスタ
-
-クラスタとはプリミティブ操作の集合である。
-また各ストリーム、セルはプリミティブと同一の
-
-prfのユーザはクラスタを明示的に宣言することによって、プリミティブ操作の集合を定義できる。
-
-```java
-// 暗黙的なクラスタ０
-Stream<int> s1;
-Stream<double> s2;
-
-// 明示的なクラスタ１
-Cluster cluster1;
-Stream<int> s3 = s1.map((v) => v * v);
-Stream<double> s4 = s2.filter((v) => v > 10.0);
-Stream<double> s5 = s1.merge(s2, (v1, v2) => v1 + v2);
-cluster1.close();
-// クラスタ１の終了
-
-// 暗黙的なクラスタ２
-```
-
-- クラスタとはなにか
-- クラスタとトランザクションの関係性
-
-== クラスタ間の接続
-
-- クラスタを接続した際の動作
-
-== グローバルセルループ
-
-- グローバルセルループがなにか
-- グローバルセルループの制約について
-
-= 方針
-
-大前提となる方針について簡単に。
-
-- 何をして何をしないのか
-- FRPから逸脱する部分をどう許しているのか
-  - Map,KeyFrame,MapPointをコピーできない理由、しなくてもいい理由、してはいけない理由
-  - Atlasに対する副作用が大丈夫な理由、無いとだめな理由
+我々としてはORB-SLAM3のFRP化を目指しているため、1でできる限りのネットワーク構築を目指している。
+2に関しては、Trackingには3D点の復元など我々の知識では扱えない部分が多く存在すること、実装量の削減のためなどいくつかの理由で実装を行わない方針となった。
+3に関しても実装量の削減のためや、副作用が多く存在しFRP化が難しいなどの理由で実装を行わない方針となった。
+4に関しては元の並列処理において複数スレッド間で同時に参照・編集を行っていた部分であるため、ここの副作用を取り除いてしまうとORB-SLAM3として正常な動作が望めないと判断し副作用を残す方針となった。
 
 = 全体像
 
-// ![ネットワーク図:全体像]()
+#figure(
+  image("images/Overall.png"),
+  caption: [
+    全体のネットワーク
+  ]
+)
 
-- 各モジュールの概要
-  - 働き
-  - 入力・出力
-- 動作
-- 元のORB-SLAM3との違い
-- クラスタの分け方
-- グローバルループ
+== 各モジュールの概要
 
-= LocalMapping
+以下のモジュールが存在する
+
+- Tracking
+  - 元のORB-SLAM3のTrackingに、FRPとの橋渡しを行う変更を加えたモジュール。
+  - FRPの外で動作する。
+- LocalMapping
+  - Trackingで作られたキーフレームに対する最適化を行う。
+- LoopClosing
+  - LocalMappingで最適化が施されたキーフレームを元にループとマージの検出を行う。
+  - 後述するGBAManagerを場合によって起動させる。
+- GBAManager
+  - マップ全体の最適化を行うモジュール。
+  - FRPの外で動作するGBAを行っているスレッドを管理する。
+
+== 動作
+
+全体としては、Trackingのメソッドが外部から呼び出されることから始まる。
+Trackingが入力を処理してキーフレームにしたものをLMInputBridgeを介して
+LocalMappingに渡す。
+その後、LocalMappingがキーフレームに最適化を施した後にそのキーフレームを
+LoopClosingにわたす。
+最後に、LoopClosingがループやマージの検出と統合の処理を行い、状況に応じて
+マップ全体の最適化をGBAManagerを用いて行う。
+
+ここで、各モジュールは独立したティックの発火で動作しており、各モジュール間の
+データの受け渡しはストリームで行われる。
+
+== ORB-SLAM3にのみ存在する機能
+
+- Atlasのセーブ/ロード
+  - 存在するが、使われていなく動作が不明瞭だった。
+  - 機能を削除しても動作に支障が出ないため削除した。
+- LocalMappingの実行の有効無効の切り替え
+  - 実装にはネットワークを止める（もしくは類似する）動作が必要。
+  - 実装に時間がかかりそうなので、必要になったら追加する。
+
+= 各モジュールの詳細
+
+== LocalMapping
 
 // ![ネットワーク図:LocalMapping]()
 
@@ -142,12 +138,16 @@ cluster1.close();
 
 その他注意点・工夫点折り込みつつ
 
-= LoopClosing
+== LoopClosing
 
 #figure(
-  image("images/LoopClosingFRP.png")
+  image("images/LoopClosingFRP.png"),
+  caption: [
+    LoopClosingのネットワーク
+  ]
 )
-== 入力
+=== 入力
+
 - s_tick
   - Systemから送られるunitのストリーム。
   - 5秒おきに発火。
@@ -171,7 +171,7 @@ cluster1.close();
   - GBAが行なわれているかのセル。
   - 通常Merge語にはGBAを行なわないが、GBAの途中でMergeを検出しGBAが停止した場合、Mergeの終了後GBAを行う。
 
-== 出力
+=== 出力
 
 - s_stopGBA
   - GBAを停止させるunitのストリーム。
@@ -185,7 +185,8 @@ cluster1.close();
   - LCが停止したかどうかのセル
   - boolの値を持ちtrueのとき、LCが停止している。
 
-== 内部セル
+=== 内部セル
+
 - c_mode
   - Detect、CorrectLoop、Mergeの３種の状態を持つ。
   - この状態によって、tickを受け取った後の動作が決まる。
@@ -221,12 +222,12 @@ cluster1.close();
   - c_stopLMをfalseにする。
   - Detect時にGBAを止めていたなら、s_runGBAを発火する。
 
-== 元のLoopClosingとの差異
+=== 元のLoopClosingとの差異
 
 - 元の実装ではc_modeのような状態を持っていない。FRPではwhileとsleepで外部の変化を待つことができないため、外部の状態の変更を待つ必要のある処理をmodeで分けることで、外部の状態の変更をtickごとに待つことができるようにした。
 - GBAをループクロージング内でスレッドを立てて実行していたが、GBAManagerに委託するようにした。
 
-= GBAManager
+== GBAManager
 
 #figure(
   image("images/GBAManager.png"),
@@ -235,7 +236,7 @@ cluster1.close();
   ]
 )
 
-== 状態
+=== 状態
 
 - c_thread
   - GBAが起動しているなら、そのスレッドを保持する
@@ -244,7 +245,7 @@ cluster1.close();
 - c_runInfo
   - GBAを起動させることができる際に起動のための情報を保持する
 
-== 入力
+=== 入力
 
 入力として以下のストリームとセルを受け取る
 
@@ -260,7 +261,7 @@ cluster1.close();
 - c_isLCStopped
   - ループクロージングが停止しているかを保持するセル
 
-== 出力
+=== 出力
 
 出力として以下のストリームが存在する
 
@@ -271,7 +272,7 @@ cluster1.close();
 - c_running
   - GBAが動作している際にtrueとなるセル
 
-== 動作
+=== 動作
 
 動作は主にs_tickによって行われ、以下のようになっている。
 
@@ -289,17 +290,17 @@ cluster1.close();
   - c_updateInfoに情報が無いなら何も行わない
   - そうでないなら、上と同じ動作を行う
 
-== 注意点
+=== 注意点
 
 GBAをネットワークにすると、GBAを停止するという動作がFRPで表現できないため、
 GBAをFRPの外で起動し、そのスレッドの管理をセルを通じて行うようにしている。
 
-= Tracking
+== Tracking
 
 今回TrackingはFRPにしないが、FRPと連携して動く必要があるため、
 後述するInputBridgeとOutputBridgeを用いて各モジュールの関数呼び出しを置換した。
 
-== InputBridge
+=== InputBridge
 
 ネットワークへ渡すStreamSinkを持ち、
 sendを行う関数群を用いてネットワークへの入力を行う。
@@ -312,7 +313,7 @@ struct InputBridge {
 };
 ```
 
-== OutputBridge
+=== OutputBridge
 
 ネットワークの出力ストリーム・セルをlistenし、
 内部で変数を書き換えそれをゲッターを用いて取得する。
@@ -333,6 +334,5 @@ private:
 = どっかに入れたほうが良いかも？
 
 - かたみ先輩のほうでキューを使ってネットワークの接続を切り離していたこと、今回その必要がないこと
-- 一部機能を消していること
 - 図の記法について
   - セルの矢印が違ったりとか
