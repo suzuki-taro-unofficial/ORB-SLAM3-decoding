@@ -111,10 +111,9 @@
 また、本実装ではFRPとそうでない部分をつなげる必要があり、それを図に明記するため
 繋がりを点線の矢印 (@conn-frp-non-frp) で記述する。
 
+= FRP化されたORB-SLAM3の全体像
 
-= 実装の全体像
-
-FRP化されたORB_SLAM3（以降ORB_SLAM3_FRP）全体のネットワーク図は以下のようになる。
+FRP化されたORB-SLAM3（以降ORB_SLAM3_FRP）全体のネットワーク図は以下のようになる。
 
 #figure(
   image("images/Overall.png"),
@@ -138,7 +137,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 - `LCInputBridge`, `LoopClosing`で１つ
 - `GBAManager`で１つ
 
-またTrackingはメインスレッドで動作するため、上の３つとTrackingも非同期で動作する。
+またTrackingの本動作はメインスレッドで動作するため、上の３つとTrackingも非同期で動作する。
 
 == 各モジュールの概要
 
@@ -190,7 +189,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 
 - s_tick
   - Systemから送られるunitのストリーム。
-  - 5秒おきに発火。
+  - 5ミリ秒おきに発火。
 - s_insertKF
   - LMから送られるKFのストリーム。
   - キューに蓄えられる。
@@ -233,7 +232,7 @@ LocalMappingは専用の作動ストリームを受けてTrackingからもらっ
 - c_detectInfo
   - Detectorで得られた情報を、ループとじ込みやMergeに渡すためのセル
 
-== 動作
+=== 動作
 
 === Detect
 
@@ -340,7 +339,11 @@ GBAをFRPの外で起動し、そのスレッドの管理をセルを通じて�
 == Tracking
 
 今回TrackingはFRPにしないが、FRPと連携して動く必要があるため、
-後述するInputBridgeとOutputBridgeを用いて各モジュールの関数呼び出しを置換した。
+後述するInputBridgeとOutputBridgeを用いて各モジュールに対する処理を置換した。
+
+置換した処理としては以下の通り
+
+- TODO
 
 === InputBridge
 
@@ -351,7 +354,7 @@ sendを行う関数群を用いてネットワークへの入力を行う。
 struct InputBridge {
   InputBridge();
   void doSomething(int value) { ssink_doSomething.send(value); }
-  sodium::stream<int> ssink_doSomething;
+  sodium::stream<int> s_doSomething;
 };
 ```
 
