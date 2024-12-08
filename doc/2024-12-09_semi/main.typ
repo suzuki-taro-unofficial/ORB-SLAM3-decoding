@@ -29,6 +29,7 @@
   lang: "ja",
   font: ("IPAMincho")
 )
+
 #place(
   top + center,
   float: true,
@@ -53,8 +54,6 @@
     ]
   )
 ]
-
-
 
 = ORB-SLAM3について
 
@@ -131,13 +130,16 @@ cluster1.close();
 
 == 動作
 
-各モジュールは独立したティックの発火で動作する。
+全体としては、Trackingのメソッドが外部から呼び出されることから始まる。
+Trackingが入力を処理してキーフレームにしたものをLMInputBridgeを介して
+LocalMappingに渡す。
+その後、LocalMappingがキーフレームに最適化を施した後にそのキーフレームを
+LoopClosingにわたす。
+最後に、LoopClosingがループやマージの検出と統合の処理を行い、状況に応じて
+マップ全体の最適化をGBAManagerを用いて行う。
 
-== 元のORB-SLAM3との違い
-
-== クラスタの分け方
-
-== グローバルループ
+ここで、各モジュールは独立したティックの発火で動作しており、各モジュール間の
+データの受け渡しはストリームで行われる。
 
 = LocalMapping
 
