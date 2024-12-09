@@ -6,8 +6,6 @@
 #show: style.with(title: title)
 #title_page(title: title, author: author)
 
-#include "todo.typ"
-
 #include "prerequisite-knowledge/main.typ"
 
 = 今回の実装方針
@@ -62,7 +60,3 @@
 #include "system-overview.typ"
 
 #include "each-module-detail/main.typ"
-
-= どっかに入れたほうが良いかも？
-
-- かたみ先輩のほうでキューを使ってネットワークの接続を切り離していたこと、今回その必要がないこと
