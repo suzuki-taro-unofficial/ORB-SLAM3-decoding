@@ -4,7 +4,7 @@
 
 // ![ネットワーク図:LocalMapping]()
 #figure(
- image("../images/LocalMapping.svg"),
+  image("../images/LocalMapping.svg"),
   caption: [LocalMappingのネットワーク]
 )
 
@@ -27,7 +27,7 @@ s_tickの残りの２回についてはLocalMappingの停止・稼働状態の�
   - ２回目と３回目のInitializeIMU
   - ２回目と３回目が同一トランザクションで起こることはない
   - １回目と同一トランザクションで起こる場合はある
-- ScaleRefinement
++ ScaleRefinement
   - マップに含まれるKFが200以下の時だけ
 
 そして本処理が実行された場合には、どこまで実行されたとしても最後にs_insertKFtoLCが発火し、
