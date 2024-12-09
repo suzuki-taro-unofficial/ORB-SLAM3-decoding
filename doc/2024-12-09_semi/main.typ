@@ -6,6 +6,8 @@
 #show: style.with(title: title)
 #title_page(title: title, author: author)
 
+#include "todo.typ"
+
 #include "prerequisite-knowledge/main.typ"
 
 = 今回の実装方針
