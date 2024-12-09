@@ -3,10 +3,6 @@
 今回TrackingはFRPにしないが、FRPと連携して動く必要があるため、
 後述するInputBridgeとOutputBridgeを用いて各モジュールに対する処理を置換した。
 
-置換した処理としては以下の通り
-
-- TODO
-
 === InputBridge
 
 ネットワークへ渡すStreamSinkを持ち、
