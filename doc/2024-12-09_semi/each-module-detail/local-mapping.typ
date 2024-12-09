@@ -10,7 +10,7 @@
 
 LocalMappingは、Trackingから入力されたキーフレームをキューに溜め込む。
 s_tickストリームが発火した際に３回に一回だけキューからキーフレームを取り出し、本処理を開始する。
-s_tickの残りの２回についてはLocalMappingの停止・稼働状態の更新をするにとどめる。停止・稼働状態については@local-mapping_stop-manager で詳しく説明する
+s_tickの残りの２回についてはLocalMappingの停止・稼働状態の更新をするにとどめる。停止・稼働状態については StopManager で詳しく説明する
 
 本処理は以下の順で実行される
 
