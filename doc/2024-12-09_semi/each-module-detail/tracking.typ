@@ -16,7 +16,37 @@ sendを行う関数群を用いてネットワークへの入力を行う。
 struct InputBridge {
   InputBridge();
   void doSomething(int value) { ssink_doSomething.send(value); }
-  sodium::stream<int> s_doSomething;
+  sodium::stream_sink<int> s_doSomething;
+};
+
+struct Outer {
+  Outer(InputBridge ib) : ib(ib) {}
+  void Run(void) {
+    ...
+    ib.doSomething();
+    ...
+  }
+  InputBridge ib;
+};
+
+struct FRP {
+  FRP(InputBridge ib) {
+    ...
+    auto s = ib.s_doSomething.map([](int x) { ... });
+    ...
+  }
+};
+
+struct System {
+  System() {
+    ...
+    InputBridge ib;
+    FRP frp{ib};
+    ...
+    Outer outer{ib};
+    outer.Run();
+    ...
+  }
 };
 ```
 
@@ -36,6 +66,34 @@ struct OutputBridge {
 private:
   int sv, cv;
 };
-```
 
+struct Outer {
+  Outer(OutputBridge ob) : ob(ob) {}
+  void Run(void) {
+    ...
+    auto sv = ob.get_sv();
+    auto cv = ob.get_cv();
+    ...
+  }
+  OutputBridge ob;
+};
+
+struct FRP {
+  FRP() {}
+  sodium::stream<int> s;
+  sodium::cell<int> c;
+};
+
+struct System {
+  System() {
+    ...
+    FRP frp{};
+    OutputBridge ob{frp.s, frp.c};
+    ...
+    Outer outer{ob};
+    outer.Run();
+    ...
+  }
+};
+```
 
