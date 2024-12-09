@@ -35,15 +35,4 @@ LoopClosingにキーフレームが渡される。
 
 本処理内のそれぞれの処理については元々のORB-SLAM3とほぼ同一となっている。
 
-
-
-
-
-- 入力
-- 振る舞い・出力
-- 詳細
-- 元のLocalMappingとの差異
-
-その他注意点・工夫点折り込みつつ
-
 === StopManager <local-mapping_stop-manager>
