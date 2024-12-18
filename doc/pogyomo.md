@@ -243,3 +243,42 @@ void NonFRP_OperateForFA(FAInputBridge &fa_ib, FAOutputBridge &fa_ob) {
     ...
 }
 ```
+
+## sodiumの罠
+
+以下のコードは期待通りに動かない
+
+```c++
+#include <sodium/sodium.h>
+
+#include <iostream>
+
+static int count = 0;
+
+void proc(int x) {
+    count += x;
+}
+
+sodium::cell<int> build(sodium::stream<int> s) {
+    return s
+        .map([](int x) {
+            proc(x);
+            return 0;
+        })
+        .hold(0);
+}
+
+int main(void) {
+    sodium::stream_sink<int> ss;
+    build(ss);
+    // build(ss).listen([](auto) {});
+
+    ss.send(1);
+    usleep(500000);
+    std::cout << count << std::endl;
+}
+```
+
+これは、 `build(ss)` が返すセルが使われていないため、おそらくネットワークの構築時にそのセルに影響するネットワークが無視されるから。
+
+セルに対してlistenをするとこれは期待通りに動作する。
