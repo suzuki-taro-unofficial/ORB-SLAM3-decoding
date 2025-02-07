@@ -29,6 +29,7 @@
 #result_figure("res/result-mps.csv", "MapPoints for each dataset", <res-mps>)
 #result_figure("res/result-sec.csv", "Execution time each dataset", <res-sec>)
 
+#result_figure("res/result-lm-executed-times.csv", "LocalMappingの実行回数", <res-lm-executed-times>)
 #result_figure("res/result-kfremoved.csv", "Removed KeyFrames", <res-removed-kfs>)
 #result_figure("res/result-mpremoved.csv", "Removed MapPointss", <res-removed-mps>)
 #result_figure("res/result-lm-time-ave.csv", "LocalMappingの平均実行時間", <res-lm-time-ave>)
