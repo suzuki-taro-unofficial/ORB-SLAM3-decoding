@@ -11,7 +11,7 @@
       table(
         columns: 7,
         table.cell(rowspan: 2, align: horizon, [dataset]),
-        [Original], [Sodium], [prf], [Original], [Sodium], [prf],
+        [Original], [prf serial], [prf parallel], [Original], [prf serial], [prf parallel],
         table.cell(colspan: 3, [No Inertial]),
         table.cell(colspan: 3, [With Inertial]),
         ..csv(file).flatten()
