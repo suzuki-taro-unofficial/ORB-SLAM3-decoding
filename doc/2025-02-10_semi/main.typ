@@ -5,7 +5,7 @@
 
 #show: style.with(title: title, author: author, date: "2025/02/10")
 
-#let overall_result_figure(file, cap_str, cap) = {
+#let result_figure(file, cap_str, cap) = {
   [
     #figure(
       table(
@@ -25,11 +25,11 @@
 
 = 実行結果
 
-#overall_result_figure("res/result-kfs.csv", "KeyFrames for each dataset", <res-kfs>)
-#overall_result_figure("res/result-mps.csv", "MapPoints for each dataset", <res-mps>)
-#overall_result_figure("res/result-sec.csv", "Execution time each dataset", <res-sec>)
+#result_figure("res/result-kfs.csv", "KeyFrames for each dataset", <res-kfs>)
+#result_figure("res/result-mps.csv", "MapPoints for each dataset", <res-mps>)
+#result_figure("res/result-sec.csv", "Execution time each dataset", <res-sec>)
 
-#overall_result_figure("res/result-kfremoved.csv", "Removed KeyFrames", <res-removed-kfs>)
-#overall_result_figure("res/result-mpremoved.csv", "Removed MapPointss", <res-removed-mps>)
-#overall_result_figure("res/result-lm-time-ave.csv", "LocalMappingの平均実行時間", <res-lm-time-ave>)
-#overall_result_figure("res/result-lm-time-sum.csv", "LocalMappingの総実行時間", <res-lm-time-sum>)
+#result_figure("res/result-kfremoved.csv", "Removed KeyFrames", <res-removed-kfs>)
+#result_figure("res/result-mpremoved.csv", "Removed MapPointss", <res-removed-mps>)
+#result_figure("res/result-lm-time-ave.csv", "LocalMappingの平均実行時間", <res-lm-time-ave>)
+#result_figure("res/result-lm-time-sum.csv", "LocalMappingの総実行時間", <res-lm-time-sum>)
