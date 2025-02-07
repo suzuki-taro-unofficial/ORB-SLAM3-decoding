@@ -21,8 +21,6 @@
   ]
 }
 
-= 前回からの変更点
-
 = 実行結果
 
 #result_figure("res/result-kfs.csv", "KeyFrames for each dataset", <res-kfs>)
@@ -34,3 +32,6 @@
 #result_figure("res/result-mpremoved.csv", "Removed MapPointss", <res-removed-mps>)
 #result_figure("res/result-lm-time-ave.csv", "LocalMappingの平均実行時間", <res-lm-time-ave>)
 #result_figure("res/result-lm-time-sum.csv", "LocalMappingの総実行時間", <res-lm-time-sum>)
+
+#result_figure("res/result-loops.csv", "Loopの検出回数", <res-lc-loops>)
+#result_figure("res/result-merges.csv", "Mergeの検出回数", <res-lc-merges>)
