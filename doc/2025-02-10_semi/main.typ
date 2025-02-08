@@ -37,6 +37,21 @@
 #result_figure("res/result-merges.csv", "Mergeの検出回数", <res-lc-merges>)
 
 #figure(
+  image("res/V101-noInertial-original.png"),
+  caption:[
+    originalが生成した地図(IMU無し)
+  ]
+)
+
+#figure(
+  image("res/V101-noInertial-prf.jpg"),
+  caption:[
+    prfが生成した地図(IMU無し)
+  ]
+)
+
+
+#figure(
   image("res/V101-inertial-original.jpg"),
   caption:[
     originalが生成した地図(IMUあり)
@@ -46,7 +61,7 @@
 #figure(
   image("res/V101-inertial-prf.jpg"),
   caption:[
-    prfが生成した地図(IMU無し)
+    prfが生成した地図(IMUあり)
   ]
 )
 
