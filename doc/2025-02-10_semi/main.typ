@@ -32,6 +32,7 @@
 #result_figure("res/result-mpremoved.csv", "Removed MapPointss", <res-removed-mps>)
 #result_figure("res/result-lm-time-ave.csv", "LocalMappingの平均実行時間", <res-lm-time-ave>)
 #result_figure("res/result-lm-time-sum.csv", "LocalMappingの総実行時間", <res-lm-time-sum>)
+#result_figure("res/result-removedmp-ratio.csv", "削除されたMP数 ／ 総KF数", <res-lm-time-sum>)
 
 #result_figure("res/result-loops.csv", "Loopの検出回数", <res-lc-loops>)
 #result_figure("res/result-merges.csv", "Mergeの検出回数", <res-lc-merges>)
@@ -93,3 +94,26 @@ KeyFrameCullingによって削除されるKeyFrameの数がオリジナルより
 
 LoopClosingのループ、マージの検出回数の検出回数は違いが見られた。キーフレームの量や質の差などにより、このような差が生まれたと考えている。
 ループを検出すべきデータセット（Vから始まるデータセット）でループを検出できているので、ただしく検出の動作ができていると考えている。
+
+- LoopClosingのループ、マージの検出回数の検出回数は若干のブレが見られた。
+  - キーフレームの量や質の差などにより、差が生まれたと考えている。
+  - ループを検出すべきデータセット（Vから始まるデータセット）でループを検出できている。
+
+== TODO
+
+
+- 総キーフレーム数と消されたMapPointの数の相関を見る
+  - 比率がオリジナルと同じような結果であればこれは総キーフレーム数に依存していることがわかる
+  - 比率勝ちがければマップポイント削除に固有の問題がある可能性がある
+- MapPointのマッチングがオリジナルに比べ取れていない可能性がある
+  - (図3, 4を見たときにクロテンが増えていることから)
+  - マッチング処理の場所の調査と実行の判定などにさいがないか確認
+  - 一個前のマップ情報を見れているか
+- 動画フレーム数と処理フレーム数を見てみる
+- MH04のハズレ値について調査
+  - MH04,05は実行回数を増やしてみたい
+- 各データの標準偏差を見てみる
+- With Inertialのときの処理に変なことが起きてないか見張る
+
+
+>>>>>>> Stashed changes
